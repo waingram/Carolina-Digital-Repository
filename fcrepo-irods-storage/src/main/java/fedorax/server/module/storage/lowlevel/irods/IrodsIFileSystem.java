@@ -391,7 +391,7 @@ public class IrodsIFileSystem {
 			}
 			
 			try {
-				//Lock the file so that it won't change while 
+				//Lock the file so that it won't change while verifying the checksum
 				lock = lockPath(file.getAbsolutePath());
 				
 				IRODSFile irodsFile = irodsFileSystem.getIRODSFileFactory(account).instanceIRODSFile(file.getPath());
