@@ -27,6 +27,9 @@ import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.codec.binary.Hex;
 import org.fcrepo.server.errors.LowlevelStorageException;
@@ -60,6 +63,8 @@ import org.slf4j.LoggerFactory;
 public class IrodsIFileSystem {
 	private static final Logger LOG = LoggerFactory.getLogger(IrodsIFileSystem.class);
 
+	private final Map<String,PathReentrantLock> pathLockMap = new HashMap<String,PathReentrantLock>();
+	
 	public IrodsIFileSystem(int irodsBufferSize, IRODSFileSystem irodsFileSystem, IRODSAccount account)
 			throws LowlevelStorageException {
 		LOG.debug("IrodsIFileSystem.IrodsIFileSystem()");
@@ -145,7 +150,9 @@ public class IrodsIFileSystem {
 	}
 
 	private boolean delete(String path) throws LowlevelStorageException {
+		PathReentrantLock lock = null;
 		try {
+			lock = lockPath(path);
 			IRODSFile ifile = irodsFileSystem.getIRODSFileFactory(account).instanceIRODSFile(path);
 			return ifile.delete();
 		} catch (JargonException e) {
@@ -158,6 +165,8 @@ public class IrodsIFileSystem {
 				} catch (JargonException ignored) {
 				}
 			}
+			if (lock != null)
+				lock.unlock();
 		}
 	}
 
@@ -292,24 +301,19 @@ public class IrodsIFileSystem {
 		long now = new Date().getTime();
 		boolean rollback = false;
 		StringBuilder rollbackLog = new StringBuilder();
+		PathReentrantLock lock = null;
 		try {
-
+			//Lock the path of the file being rewritten
+			lock = lockPath(file.getAbsolutePath());
+			
 			IRODSFile destination = irodsFileSystem.getIRODSFileFactory(account).instanceIRODSFile(file.getAbsolutePath());
+			
 			IRODSFile temp = irodsFileSystem.getIRODSFileFactory(account).instanceIRODSFile(
 					destination.getAbsolutePath() + ".temp." + now);
 			IRODSFile old = irodsFileSystem.getIRODSFileFactory(account).instanceIRODSFile(
 					destination.getAbsolutePath() + ".old." + now);
 			IRODSFile trueLocation = irodsFileSystem.getIRODSFileFactory(account)
 					.instanceIRODSFile(file.getAbsolutePath());
-
-			// IRODSFile destination = new IRODSFile(fileSystem,
-			// file.getAbsolutePath());
-			// IRODSFile temp = new IRODSFile(fileSystem,
-			// destination.getAbsolutePath() + ".temp." + now);
-			// IRODSFile old = new IRODSFile(fileSystem,
-			// destination.getAbsolutePath() + ".old." + now);
-			// IRODSFile trueLocation = new IRODSFile(fileSystem,
-			// file.getAbsolutePath());
 
 			if (!destination.exists()) {
 				throw new LowlevelStorageException(true, "File to rewrite does not exist! (" + destination + ")");
@@ -363,6 +367,8 @@ public class IrodsIFileSystem {
 			} catch (JargonException e) {
 				throw new Error("Cannot close irods session", e);
 			}
+			if (lock != null)
+				lock.unlock();
 		}
 	}
 
@@ -372,29 +378,47 @@ public class IrodsIFileSystem {
 
 			LOG.debug("trying to write to: " + file.getPath());
 			IRODSFile parentFile = irodsFileSystem.getIRODSFileFactory(account).instanceIRODSFile(file.getParent());
-			if (!parentFile.exists()) {
-				parentFile.mkdirs();
-			}
-			IRODSFile irodsFile = irodsFileSystem.getIRODSFileFactory(account).instanceIRODSFile(file.getPath());
-			//irodsFile.createNewFile();
-			IRODSFileOutputStream irodsFileOutputStream = irodsFileSystem.getIRODSFileFactory(account)
-					.instanceIRODSFileOutputStream(irodsFile);
-			BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(irodsFileOutputStream, irodsBufferSize);
-
-			CopyResult copyResult = stream2streamCopy(content, bufferedOutputStream);
-			// get IRODS checksum
-			String irodschecksum = this.getMD5ChecksumFromIRODS(irodsFile);
-			if (!copyResult.md5.equals(irodschecksum)) {
-				LOG.debug("local and iRODS checksums DO NOT MATCH");
-				if (!irodsFile.delete()) {
-					throw new LowlevelStorageException(true, irodsFile.getAbsolutePath()
-							+ " did not match local checksum and could not be deleted");
-				} else {
-					throw new LowlevelStorageException(true, irodsFile.getAbsolutePath()
-							+ " did not match local checksum, file was deleted");
+			
+			PathReentrantLock lock = null;
+			try {
+				lock = lockPath(parentFile.getAbsolutePath());
+				if (!parentFile.exists()) {
+					parentFile.mkdirs();
 				}
+			} finally {
+				if (lock != null)
+					lock.unlock();
 			}
-			return copyResult.size;
+			
+			try {
+				//Lock the file so that it won't change while 
+				lock = lockPath(file.getAbsolutePath());
+				
+				IRODSFile irodsFile = irodsFileSystem.getIRODSFileFactory(account).instanceIRODSFile(file.getPath());
+				
+				IRODSFileOutputStream irodsFileOutputStream = irodsFileSystem.getIRODSFileFactory(account)
+						.instanceIRODSFileOutputStream(irodsFile);
+				BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(irodsFileOutputStream, irodsBufferSize);
+	
+				CopyResult copyResult = stream2streamCopy(content, bufferedOutputStream);
+				// get IRODS checksum
+				String irodschecksum = this.getMD5ChecksumFromIRODS(irodsFile);
+				if (!copyResult.md5.equals(irodschecksum)) {
+					LOG.debug("local and iRODS checksums DO NOT MATCH");
+					if (!irodsFile.delete()) {
+						throw new LowlevelStorageException(true, irodsFile.getAbsolutePath()
+								+ " did not match local checksum and could not be deleted");
+					} else {
+						throw new LowlevelStorageException(true, irodsFile.getAbsolutePath()
+								+ " did not match local checksum, file was deleted");
+					}
+				}
+				
+				return copyResult.size;
+			} finally {
+				if (lock != null)
+					lock.unlock();
+			}
 		} catch (JargonException e) {
 			throw new LowlevelStorageException(true, "IRODSFedoraFileSystem.write(): [" + file.getPath() + "]", e);
 		} catch (IOException e) {
@@ -469,6 +493,61 @@ public class IrodsIFileSystem {
 				} catch (JargonException ignored) {
 				}
 			}
+		}
+	}
+
+	/**
+	 * Locks a file path and returns the lock object.
+	 * @param path
+	 * @return
+	 */
+	public PathReentrantLock lockPath(String path){
+		PathReentrantLock lock = null;
+		synchronized(pathLockMap){
+			lock = pathLockMap.get(path);
+			if (lock == null){
+				lock = new PathReentrantLock(path);
+				pathLockMap.put(path, lock);
+			}
+		}
+		LOG.debug("Locking " + lock.hashCode() + " path " + path);
+		lock.lock();
+		return lock;
+	}
+	
+	/**
+	 * Reentrant lock pertaining to a particular file system path.
+	 * @author bbpennel
+	 *
+	 */
+	public class PathReentrantLock extends ReentrantLock {
+		private static final long serialVersionUID = -2816243191123830856L;
+		private String path;
+		
+		public PathReentrantLock(String path){
+			super();
+			this.path = path;
+		}
+		
+		public PathReentrantLock(String path, boolean fair){
+			super(fair);
+			this.path = path;
+		}
+		
+		@Override
+		public void unlock(){
+			synchronized(pathLockMap){
+				LOG.debug("unlocking " + path);
+				super.unlock();
+				//If there are no other threads queued to lock this path then clean up the map
+				if (this.getQueueLength() == 0)
+					pathLockMap.remove(path);
+					
+			}
+		}
+
+		public String getPath() {
+			return path;
 		}
 	}
 }
