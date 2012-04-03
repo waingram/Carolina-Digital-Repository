@@ -378,12 +378,16 @@ public class IrodsIFileSystem {
 
 			LOG.debug("trying to write to: " + file.getPath());
 			IRODSFile parentFile = irodsFileSystem.getIRODSFileFactory(account).instanceIRODSFile(file.getParent());
+			boolean success = false;
 			
 			PathReentrantLock lock = null;
 			try {
 				lock = lockPath(parentFile.getAbsolutePath());
 				if (!parentFile.exists()) {
-					parentFile.mkdirs();
+					success = parentFile.mkdirs();
+					if (!success) {
+						LOG.warn("Create parent directory failed at path " + parentFile.getAbsolutePath() + " for file " + file.getPath());
+					}
 				}
 			} finally {
 				if (lock != null)
