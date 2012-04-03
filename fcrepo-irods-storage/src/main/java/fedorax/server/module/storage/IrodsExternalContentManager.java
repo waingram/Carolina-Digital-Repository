@@ -134,10 +134,12 @@ public class IrodsExternalContentManager extends Module implements ExternalConte
 			m_http = new WebClient();
 			// m_http.USER_AGENT = m_userAgent;
 
-			String stagingLocations = getModuleParameter(Parameter.STAGING_LOCATIONS, false);
-			if (stagingLocations != null && stagingLocations.length() > 5) {
-				LOG.info("Configuring staging locations: " + stagingLocations);
-				try {
+			String stagingLocations = null;
+			try {
+				stagingLocations = getModuleParameter(Parameter.STAGING_LOCATIONS, false);
+				
+				if (stagingLocations.length() > 5) {
+					LOG.info("Configuring staging locations: " + stagingLocations);
 					String[] stages = stagingLocations.split("[\\s]+");
 					LOG.info("Number of staging locations: " + stages.length);
 					for (String stage : stages) {
@@ -145,11 +147,11 @@ public class IrodsExternalContentManager extends Module implements ExternalConte
 						LOG.info("Adding staging location: " + logical2Path[0] + " => " + logical2Path[1]);
 						StagingManager.instance().addStage(logical2Path[0], logical2Path[1]);
 					}
-				} catch (Exception e) {
-					LOG.warn("Cannot configure staging locations.", e);
 				}
-			} else {
-				LOG.info("No staging locations configured.");
+			} catch (ModuleInitializationException ignored) {
+				LOG.info("No staging locations configured with parameter " + Parameter.STAGING_LOCATIONS);
+			} catch (Exception e) {
+				LOG.warn("Cannot configure staging locations.", e);
 			}
 
 			// register StagingManagerMBean
