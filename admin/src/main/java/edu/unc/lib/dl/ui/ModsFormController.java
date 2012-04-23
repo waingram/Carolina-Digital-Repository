@@ -24,9 +24,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.io.SAXReader;
+import org.jdom.Document;
+import org.jdom.input.SAXBuilder;
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
 import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.RequestContext;
@@ -53,20 +54,22 @@ public class ModsFormController extends CommonAdminObjectNavigationController {
 	protected ModelAndView onSubmitInternal(HttpServletRequest request, HttpServletResponse response, Object command,
 			BindException errors) throws ServletException, IOException {
 		Map model = errors.getModel();
-	    SAXReader xmlReader = new SAXReader();
+	    SAXBuilder xmlReader = new SAXBuilder();
 
 	    if ("POST".equals(request.getMethod())) {
 	        // We go a query string
 	        Document queryDocument;
 			try {
-				queryDocument = xmlReader.read(request.getInputStream());
-		        String query = queryDocument.getRootElement().getStringValue();
-		        log.warn(query);
+				XMLOutputter xmlOutputter = new XMLOutputter(Format.getPrettyFormat());
+				queryDocument = xmlReader.build(request.getInputStream());
+				log.warn(xmlOutputter.outputString(queryDocument));
+		       // String query = queryDocument.getRootElement().getStringValue();
+		       // log.warn(query);
 
 		  		return new ModelAndView("admin", model);
 
 		        
-			} catch (DocumentException e) {
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -173,6 +176,8 @@ public class ModsFormController extends CommonAdminObjectNavigationController {
 	protected Object formBackingObject(HttpServletRequest request) throws Exception {
 		ModsFormDAO object = new ModsFormDAO();
 
+		request.getSession();
+		
 		object.setMods("<mods:mods xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:mets=\"http://www.loc.gov/METS/\" xmlns:mods=\"http://www.loc.gov/mods/v3\" xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><mods:titleInfo><mods:title>A brutalized culture : the horror genre in contemporary Irish literature</mods:title></mods:titleInfo><mods:genre authority=\"local\">http://purl.org/eprint/type/Thesis</mods:genre><mods:typeOfResource>text</mods:typeOfResource><mods:name type=\"personal\"><mods:affiliation>English</mods:affiliation><mods:namePart>Eldred, Laura Gail.</mods:namePart><mods:role><mods:roleTerm>creator</mods:roleTerm></mods:role></mods:name><mods:originInfo><mods:dateIssued encoding=\"iso8601\" keyDate=\"yes\">200605</mods:dateIssued></mods:originInfo><mods:language><mods:languageTerm authority=\"iso639-2b\" type=\"code\">eng</mods:languageTerm></mods:language><mods:abstract>This dissertation...</mods:abstract><mods:accessCondition type=\"use\">The author has granted the University of North Carolina at Chapel Hill a limited, non-exclusive right to make this publication available to the public. The author retains all other rights.</mods:accessCondition><mods:accessCondition type=\"access\">Open access</mods:accessCondition></mods:mods>");
 
 		logger.debug("in formBackingObject");
