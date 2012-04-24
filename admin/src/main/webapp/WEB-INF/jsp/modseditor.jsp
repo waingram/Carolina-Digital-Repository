@@ -40,6 +40,33 @@
 <p id="anotherElement"></p>
 
 <form id="myForm">
+<div id="titleInfo">
+
+</div>
+    <div>
+        <input type="button" id="titleAdd" value="add another title" />
+        <input type="button" id="titleDel" value="remove last title" />
+    </div>
+<div id="name"/>
+<div id="typeOfResource"/>
+<div id="genre"/>
+<div id="originInfo"/>
+<div id="language"/>
+<div id="physicalDescription"/>
+<div id="abstract"/>
+<div id="tableOfContents"/>
+<div id="targetAudience"/>
+<div id="note"/>
+<div id="subject"/>
+<div id="classification"/>
+<div id="relatedItem"/>
+<div id="identifier"/>
+<div id="location"/>
+<div id="accessCondition"/>
+<div id="part"/>
+<div id="extension"/>
+<div id="recordInfo"/>
+
     <div id="input1" style="margin-bottom:4px;" class="clonedInput">
         Name: <input type="text" name="name1" id="name1" />
     </div>
@@ -48,12 +75,18 @@
         <input type="button" id="btnAdd" value="add another name" />
         <input type="button" id="btnDel" value="remove name" />
     </div>
+
+<input type="button" id="sendXML" value="Submit Changes" />
 </form>
 
 <script>
 
 $(document).ready(function()
 {
+
+window.MyVariables = {};
+window.MyVariables.xml = {};
+
   $.ajax({
     type: "GET",
     url: "https://nagina/cdradmin/modsexample.xml",
@@ -61,6 +94,67 @@ $(document).ready(function()
     success: function(xml) { parseInputXml(xml); }
   });
 
+
+// Set up form
+ $('#titleDel').attr('disabled','disabled');
+
+// add new title
+$('#titleAdd').click(function() {
+	var num     = $('.titleInput').length; 
+	
+	if(num == undefined) num = 0;
+
+	var newNum  = new Number(num + 1);      // the numeric ID of the new input field being added
+
+	var newElem = $('<div/>').attr({'id' : 'titleDiv'+newNum, 'class' : 'titleInput'}).appendTo('#titleInfo');
+	$('<input/>').attr({'id' : 'title'+newNum, 'type' : 'text', 'name' : 'title'+newNum, 'value' : $(window.MyVariables.xml).find("titleInfo").eq(newNum - 1).find("title").eq(0).text()}).appendTo('#titleDiv'+newNum);
+
+
+        // Change	
+	$('#title'+newNum).on('change', { value : newNum }, function(event) {
+		$(window.MyVariables.xml).find("titleInfo").eq(newNum - 1).find("title").eq(0).text($('#title'+event.data.value).val());
+	});
+
+        // enable the "remove" button
+        $('#titleDel').removeAttr('disabled');
+});
+
+$('#titleDel').click(function() {
+                var num = $('.titleInput').length;
+	
+		if(num == undefined) num = 0;
+
+                if(num > 0) $('#titleDiv' + num).remove();     // remove the last element
+ 
+                // if only one element remains, disable the "remove" button
+                if (num == 1)
+                    $('#titleDel').attr('disabled','disabled');
+});
+
+
+
+$('#titleAddOld').click(function() {
+                var num     = $('.titleInput').length; // how many "duplicatable" input fields we currently have
+                var newNum  = new Number(num + 1);      // the numeric ID of the new input field being added
+ 
+                // create the new element via clone(), and manipulate it's ID using newNum value
+                var newElem = $('#input' + num).clone().attr('id', 'input' + newNum);
+ 
+                // manipulate the name/id values of the input inside the new element
+                newElem.children(':first').attr('id', 'name' + newNum).attr('name', 'name' + newNum);
+ 
+                // insert the new element after the last "duplicatable" input field
+                $('#input' + num).after(newElem);
+ 
+                // enable the "remove" button
+                $('#btnDel').removeAttr('disabled');
+
+ 
+                // business rule: you can only add 5 names
+                if (newNum == 5)
+                    $('#btnAdd').attr('disabled','disabled');
+            });
+ 
 
 
 
@@ -102,12 +196,13 @@ $('#btnAdd').click(function() {
 
             });
  
-            $('#btnDel').attr('disabled','disabled');
 
 });
 
 function parseInputXml(xml)
 {
+
+  window.MyVariables.xml = xml;
 
   //find every Tutorial and print the author
   $(xml).find("titleInfo").each(function()
@@ -115,12 +210,14 @@ function parseInputXml(xml)
     $("#someElement").append($(this).attr("type") + "<br />");
   });
 
-  sendXml(xml);
+//  sendXml(xml);
 
 }
 
+$('#sendXML').click(function() {
 
-function sendXml(xml)   {  
+
+
 
 if( !window.XMLSerializer ){
    window.XMLSerializer = function(){};
@@ -131,7 +228,7 @@ if( !window.XMLSerializer ){
 }
 
 // convert XML DOM to string
-var xmlString = xml2Str(xml);
+var xmlString = xml2Str(window.MyVariables.xml);
 
 
 
@@ -152,7 +249,7 @@ var xmlString = xml2Str(xml);
               alert(response);
            }
         });
-     }
+});
 
 
 function xml2Str(xmlNode)
