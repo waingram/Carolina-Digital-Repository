@@ -45,7 +45,6 @@
 </div>
     <div>
         <input type="button" id="titleAdd" value="add another title" />
-        <input type="button" id="titleDel" value="remove last title" />
     </div>
 <div id="name"/>
 <div id="typeOfResource"/>
@@ -67,20 +66,12 @@
 <div id="extension"/>
 <div id="recordInfo"/>
 
-    <div id="input1" style="margin-bottom:4px;" class="clonedInput">
-        Name: <input type="text" name="name1" id="name1" />
-    </div>
- 
-    <div>
-        <input type="button" id="btnAdd" value="add another name" />
-        <input type="button" id="btnDel" value="remove name" />
-    </div>
-
 <input type="button" id="sendXML" value="Submit Changes" />
 </form>
 
-<script>
 
+
+<script>
 $(document).ready(function()
 {
 
@@ -95,11 +86,40 @@ window.MyVariables.xml = {};
   });
 
 
-// Set up form
- $('#titleDel').attr('disabled','disabled');
+// set up button callbacks
+$('#titleAdd').click(function() { addTitleInfo(); });
 
-// add new title
-$('#titleAdd').click(function() {
+$('#sendXML').click(function() { sendXML(); });
+
+
+}); // document ready
+
+
+function createLabelAndInput(textValue, idValue, typeValue, nameValue, valueValue, appendValue, changeValue, objectValue) {
+	createLabel(idValue+changeValue, textValue, appendValue);
+	createInput(idValue+changeValue, typeValue, nameValue, valueValue, appendValue);
+
+        // Change	
+	$('#'+idValue+changeValue).on('change', { value : changeValue }, function(event) {
+		alert(idValue+changeValue+' change called');
+		var numElements = $(window.MyVariables.xml).find("mods").children(objectValue).eq(changeValue - 1).children(idValue).length
+		if( numElements == 0 ){
+			$('<'+idValue+'/>').appendTo($(window.MyVariables.xml).find("mods").children(objectValue).eq(changeValue - 1));
+		}
+		$(window.MyVariables.xml).find("mods").children(objectValue).eq(changeValue - 1).children(idValue).eq(0).text($('#'+idValue+event.data.value).val());
+	});
+}
+
+function createLabel(forValue, textValue, appendValue) {
+	$('<label/>').attr({'for' : forValue }).text(textValue).appendTo(appendValue);
+}
+
+function createInput(idValue, typeValue, nameValue, valueValue, appendValue) {
+	$('<input/>').attr({'id' : idValue, 'type' : typeValue, 'name' : nameValue, 'value' : valueValue}).appendTo(appendValue);
+}
+
+function addTitleInfo() {
+
 	var num     = $('.titleInput').length; 
 	
 	if(num == undefined) num = 0;
@@ -107,131 +127,70 @@ $('#titleAdd').click(function() {
 	var newNum  = new Number(num + 1);      // the numeric ID of the new input field being added
 
 	var newElem = $('<div/>').attr({'id' : 'titleDiv'+newNum, 'class' : 'titleInput'}).appendTo('#titleInfo');
-	$('<input/>').attr({'id' : 'title'+newNum, 'type' : 'text', 'name' : 'title'+newNum, 'value' : $(window.MyVariables.xml).find("titleInfo").eq(newNum - 1).find("title").eq(0).text()}).appendTo('#titleDiv'+newNum);
+	createLabelAndInput('Title', 'title', 'text', 'title'+newNum, $(window.MyVariables.xml).find("mods").children("titleInfo").eq(newNum - 1).children("title").eq(0).text(), '#titleDiv'+newNum, newNum, 'titleInfo');
+	$('<br/>').appendTo('#titleDiv'+newNum);
+	createLabelAndInput('Subtitle', 'subTitle', 'text', 'subTitle'+newNum, $(window.MyVariables.xml).find("mods").children("titleInfo").eq(newNum - 1).children("subTitle").eq(0).text(), '#titleDiv'+newNum, newNum, 'titleInfo');
+	$('<br/>').appendTo('#titleDiv'+newNum);
+//	createLabelAndInput('Part Number', 'partNumber'+newNum, 'text', 'partNumber'+newNum, $(window.MyVariables.xml).find("titleInfo").eq(newNum - 1).find("partNumber").eq(0).text(), '#titleDiv'+newNum, newNum, $(window.MyVariables.xml).find("titleInfo").eq(newNum - 1).find("partNumber").eq(0));
+	$('<br/>').appendTo('#titleDiv'+newNum);
+//	createLabelAndInput('Part Name', 'partName'+newNum, 'text', 'partName'+newNum, $(window.MyVariables.xml).find("titleInfo").eq(newNum - 1).find("partName").eq(0).text(), '#titleDiv'+newNum, newNum, $(window.MyVariables.xml).find("titleInfo").eq(newNum - 1).find("partName").eq(0));
+	$('<br/>').appendTo('#titleDiv'+newNum);
+//	createLabelAndInput('Non Sort', 'nonSort'+newNum, 'text', 'nonSort'+newNum, $(window.MyVariables.xml).find("titleInfo").eq(newNum - 1).find("nonSort").eq(0).text(), '#titleDiv'+newNum, newNum, $(window.MyVariables.xml).find("nonSort").eq(newNum - 1).find("title").eq(0));
 
+	$('<input>').attr({'type' : 'button', 'value' : 'X', 'id' : 'titleDel'+newNum}).appendTo('#titleDiv'+newNum);
+	$('<br/>').appendTo('#titleDiv'+newNum);
 
-        // Change	
-	$('#title'+newNum).on('change', { value : newNum }, function(event) {
-		$(window.MyVariables.xml).find("titleInfo").eq(newNum - 1).find("title").eq(0).text($('#title'+event.data.value).val());
-	});
+	$('#titleDel'+newNum).on('click', { value : newNum -1 }, function(event) {
+		alert('titleDel'+event.data.value+' called!');
+		// delete selected titleInfo from XML
+		$(window.MyVariables.xml).find("mods").children('titleInfo').eq(event.data.value).remove();
 
-        // enable the "remove" button
-        $('#titleDel').removeAttr('disabled');
-});
+		// redisplay titleInfo listing
+		$('#titleInfo').children().remove();
+		$(window.MyVariables.xml).find('mods').children("titleInfo").each(function() { addTitleInfo(); });
+	 });
 
-$('#titleDel').click(function() {
-                var num = $('.titleInput').length;
-	
-		if(num == undefined) num = 0;
+}
 
-                if(num > 0) $('#titleDiv' + num).remove();     // remove the last element
- 
-                // if only one element remains, disable the "remove" button
-                if (num == 1)
-                    $('#titleDel').attr('disabled','disabled');
-});
+function deleteTitleInfo() {
+       var num = $('.titleInput').length;
+	if(num == undefined) num = 0;
 
+        if(num > 0) $('#titleDiv' + num).remove();     // remove the last element
+ 
+        // if only one element remains, disable the "remove" button
+        if (num == 1)
+               $('#titleDel').attr('disabled','disabled');
+}
 
-
-$('#titleAddOld').click(function() {
-                var num     = $('.titleInput').length; // how many "duplicatable" input fields we currently have
-                var newNum  = new Number(num + 1);      // the numeric ID of the new input field being added
- 
-                // create the new element via clone(), and manipulate it's ID using newNum value
-                var newElem = $('#input' + num).clone().attr('id', 'input' + newNum);
- 
-                // manipulate the name/id values of the input inside the new element
-                newElem.children(':first').attr('id', 'name' + newNum).attr('name', 'name' + newNum);
- 
-                // insert the new element after the last "duplicatable" input field
-                $('#input' + num).after(newElem);
- 
-                // enable the "remove" button
-                $('#btnDel').removeAttr('disabled');
-
- 
-                // business rule: you can only add 5 names
-                if (newNum == 5)
-                    $('#btnAdd').attr('disabled','disabled');
-            });
- 
-
-
-
-$('#btnAdd').click(function() {
-                var num     = $('.clonedInput').length; // how many "duplicatable" input fields we currently have
-                var newNum  = new Number(num + 1);      // the numeric ID of the new input field being added
- 
-                // create the new element via clone(), and manipulate it's ID using newNum value
-                var newElem = $('#input' + num).clone().attr('id', 'input' + newNum);
- 
-                // manipulate the name/id values of the input inside the new element
-                newElem.children(':first').attr('id', 'name' + newNum).attr('name', 'name' + newNum);
- 
-                // insert the new element after the last "duplicatable" input field
-                $('#input' + num).after(newElem);
- 
-                // enable the "remove" button
-                $('#btnDel').removeAttr('disabled');
-
- 
-                // business rule: you can only add 5 names
-                if (newNum == 5)
-                    $('#btnAdd').attr('disabled','disabled');
-            });
- 
-            $('#btnDel').click(function() {
-                var num = $('.clonedInput').length; // how many "duplicatable" input fields we currently have
-                $('#input' + num).remove();     // remove the last element
- 
-                // enable the "add" button
-                $('#btnDel').removeAttr('disabled');
- 
-                // if only one element remains, disable the "remove" button
-                if (num-1 == 1)
-                    $('#btnDel').attr('disabled','disabled');
-
-                if (num < 6)
-		    $('#btnAdd').removeAttr('disabled');
-
-            });
- 
-
-});
 
 function parseInputXml(xml)
 {
-
+  // make XML accessible to rest of code
   window.MyVariables.xml = xml;
 
-  //find every Tutorial and print the author
-  $(xml).find("titleInfo").each(function()
-  {
-    $("#someElement").append($(this).attr("type") + "<br />");
-  });
+  $('<'+'fakeElement'+'/>').appendTo($(window.MyVariables.xml).find("mods").children("titleInfo").eq(0));
+  $(window.MyVariables.xml).find("mods").children("titleInfo").eq(0).children("fakeElement").attr({"test" : "one"});
 
-//  sendXml(xml);
+  $(window.MyVariables.xml).find("mods").children("titleInfo").eq(0).children("fakeElement").removeAttr("test");
+
+  // preload the title
+  $(xml).find('mods').children("titleInfo").each(function() { addTitleInfo(); });
 
 }
 
-$('#sendXML').click(function() {
+// Send XML back to be stored
+function sendXML() {
+	if( !window.XMLSerializer ){
+	   window.XMLSerializer = function(){};
 
+	   window.XMLSerializer.prototype.serializeToString = function( XMLObject ){
+	      return XMLObject.xml || '';
+	   };
+	}
 
-
-
-if( !window.XMLSerializer ){
-   window.XMLSerializer = function(){};
-
-   window.XMLSerializer.prototype.serializeToString = function( XMLObject ){
-      return XMLObject.xml || '';
-   };
-}
-
-// convert XML DOM to string
-var xmlString = xml2Str(window.MyVariables.xml);
-
-
-
+	// convert XML DOM to string
+	var xmlString = xml2Str(window.MyVariables.xml);
 
         var str = '<?xml version="1.0" encoding="UTF-8"?><foo><bar>Hello World</bar></foo>';
         // var xmlData = strToXml(str); // no need for this unless you want to use it
@@ -249,7 +208,7 @@ var xmlString = xml2Str(window.MyVariables.xml);
               alert(response);
            }
         });
-});
+}
 
 
 function xml2Str(xmlNode)
@@ -270,9 +229,5 @@ function xml2Str(xmlNode)
   }
   return false;
 }
-
-
 </script>
-
-
 </body>
