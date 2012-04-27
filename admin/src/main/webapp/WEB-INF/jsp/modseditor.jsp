@@ -82,7 +82,7 @@ window.MyVariables.xml = {};
     type: "GET",
     url: "https://nagina/cdradmin/modsexample.xml",
     dataType: "xml",
-    success: function(xml) { parseInputXml(xml); }
+    success: function(xml) { setupEditor(xml); }
   });
 
 
@@ -93,6 +93,86 @@ $('#sendXML').click(function() { sendXML(); });
 
 
 }); // document ready
+
+
+// Method to create elements
+function createElement(element, parentElement, count, containerId, indent) {
+	var existingElement = false;	
+	var elementContainerId = element.getTitle()+'Instance'+count;
+
+	$('<div/>').attr({'id' : elementContainerId, 'class' : element.getTitle()+'Instance'}).appendTo(containerId);
+
+	// See if element already exists.  If not, create it and add it to xml document
+	var numElements = $(parentElement).children(element.getTitle()).length
+	if( numElements <= count ) {
+		existingElement = true;
+	} else {
+		$('<'+element.getTitle()+'/>').appendTo(parentElement);
+	}
+
+	if(element.getType() == 'none') {
+		createElementText(element.getTitle(), '#'+elementContainerId);
+	} else if(element.getType() == 'string') {
+		var valueValue = '';
+		if(existingElement) {
+			valueValue = $(parentElement).children(element.getTitle()).eq(count).text();
+		}
+
+		createElementLabelAndInput(element.getTitle(), element.getType(), element.getTitle(), valueValue, '#'+elementContainterId, count, parentElement);
+	}
+
+}
+
+function createElementText(nameValue, appendValue) {
+		$('<h3/>').text(nameValue).appendTo(appendValue);
+}
+
+function createElementLabel(forValue, nameValue, appendValue) {
+		$('<label/>').attr({'for' : forValue }).text(nameValue).appendTo(appendValue);
+}
+
+function createElementInput(idValue, typeValue, nameValue, valueValue, appendValue) {
+	$('<input/>').attr({'id' : idValue, 'type' : typeValue, 'name' : nameValue, 'value' : valueValue}).appendTo(appendValue);
+}
+
+function createElementLabelAndInput(idValue, typeValue, nameValue, valueValue, appendValue, countValue, parentValue) {
+	createLabel(idValue+countValue, nameValue, appendValue);
+	createInput(idValue+countValue, typeValue, nameValue, valueValue, appendValue);
+
+        // Change	
+	$('#'+idValue+changeValue).on('change', { value : countValue }, function(event) {
+		alert(idValue+countValue+' change called');
+		var numElements = $(parentValue).children(nameValue).eq(countValue - 1).children(idValue).length
+		$(parentValue).children(nameValue).eq(countValue - 1).text($('#'+idValue+event.data.value).val());
+	});
+}
+
+function addTitleInfoElements() {
+
+	var num     = $('.titleInfoInstance').length; 
+	
+	if(num == undefined) num = 0;
+
+	createElement(TitleInfo, $(window.MyVariables.xml).find("mods"), num, '#titleInfo', 2);
+
+	$('<br/>').appendTo('#titleInfoInstance'+num);
+
+//	$('<input>').attr({'type' : 'button', 'value' : 'X', 'id' : 'titleDel'+newNum}).appendTo('#titleDiv'+newNum);
+//	$('<br/>').appendTo('#titleDiv'+newNum);
+
+//	$('#titleDel'+newNum).on('click', { value : newNum -1 }, function(event) {
+//		alert('titleDel'+event.data.value+' called!');
+//		// delete selected titleInfo from XML
+//		$(window.MyVariables.xml).find("mods").children('titleInfo').eq(event.data.value).remove();
+
+//		// redisplay titleInfo listing
+//		$('#titleInfo').children().remove();
+//		$(window.MyVariables.xml).find('mods').children("titleInfo").each(function() { addTitleInfo(); });
+//	 });
+
+}
+
+
 
 
 function createLabelAndInput(textValue, idValue, typeValue, nameValue, valueValue, appendValue, changeValue, objectValue) {
@@ -164,18 +244,17 @@ function deleteTitleInfo() {
 }
 
 
-function parseInputXml(xml)
+function setupEditor(xml)
 {
   // make XML accessible to rest of code
   window.MyVariables.xml = xml;
 
-  $('<'+'fakeElement'+'/>').appendTo($(window.MyVariables.xml).find("mods").children("titleInfo").eq(0));
-  $(window.MyVariables.xml).find("mods").children("titleInfo").eq(0).children("fakeElement").attr({"test" : "one"});
-
-  $(window.MyVariables.xml).find("mods").children("titleInfo").eq(0).children("fakeElement").removeAttr("test");
+//  $('<'+'fakeElement'+'/>').appendTo($(window.MyVariables.xml).find("mods").children("titleInfo").eq(0));
+//  $(window.MyVariables.xml).find("mods").children("titleInfo").eq(0).children("fakeElement").attr({"test" : "one"});
+//  $(window.MyVariables.xml).find("mods").children("titleInfo").eq(0).children("fakeElement").removeAttr("test");
 
   // preload the title
-  $(xml).find('mods').children("titleInfo").each(function() { addTitleInfo(); });
+  $(xml).find('mods').children("titleInfo").each(function() { addTitleInfoElements(); });
 
 }
 
@@ -229,5 +308,90 @@ function xml2Str(xmlNode)
   }
   return false;
 }
+
+var ID_attr = {
+	title : 'ID',
+	type : 'string',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var type_attr = {
+	title : 'type',
+	type : 'selection',
+	defaultValue : null,
+	values : ['abbreviated', 'translated', 'alternative', 'uniform'],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var Title = {
+	title : 'title',
+	repeatable : true,
+	type : 'string',
+	singleton : false,
+        attributes : [ ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	}
+};
+
+
+var TitleInfo = {
+	title : 'titleInfo',
+	repeatable : true,
+	type : 'none',
+	singleton : false,
+        attributes : [ ID_attr, type_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	}
+};
+
+
 </script>
 </body>
