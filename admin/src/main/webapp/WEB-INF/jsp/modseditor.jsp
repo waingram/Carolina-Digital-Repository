@@ -97,19 +97,21 @@ $('#sendXML').click(function() { sendXML(); });
 
 // Method to create elements
 function createElement(element, parentElement, count, containerId, indent) {
-	var existingElement = false;	
-	var elementContainerId = element.getTitle()+'Instance'+count;
+	var existingElement = false;
+	var cleanContainerId = containerId.substring(1);	
+	var elementContainerId = cleanContainerId+'_'+element.getTitle()+'Instance'+count;
 
 	$('<div/>').attr({'id' : elementContainerId, 'class' : element.getTitle()+'Instance'}).appendTo(containerId);
 
 	// See if element already exists.  If not, create it and add it to xml document
 	var numElements = $(parentElement).children(element.getTitle()).length
-	if( numElements <= count ) {
+	if( numElements >= count ) {
 		existingElement = true;
 	} else {
 		$('<'+element.getTitle()+'/>').appendTo(parentElement);
 	}
 
+	// set up element title and entry field if appropriate
 	if(element.getType() == 'none') {
 		createElementText(element.getTitle(), '#'+elementContainerId);
 	} else if(element.getType() == 'string') {
@@ -117,10 +119,20 @@ function createElement(element, parentElement, count, containerId, indent) {
 		if(existingElement) {
 			valueValue = $(parentElement).children(element.getTitle()).eq(count).text();
 		}
-
-		createElementLabelAndInput(element.getTitle(), element.getType(), element.getTitle(), valueValue, '#'+elementContainterId, count, parentElement);
+		alert(elementContainerId+'_'+element.getTitle()+" "+count);
+		createElementLabelAndInput(containerId+'_'+element.getTitle(), element.getType(), element.getTitle(), valueValue, '#'+elementContainerId, count, parentElement);
 	}
 
+	// add elements
+	var elementsArray = element.getElements();
+	for (var i = 0; i < elementsArray.length; i++) {
+		var elementCount = $(parentElement).children(element.getTitle()).eq(count).children(elementsArray[i].getTitle()).length;
+	
+		for(var j = 0; j < elementCount; j++) {
+			
+			createElement(elementsArray[i], $(parentElement).children(element.getTitle()).eq(count), j, '#'+elementContainerId, 4);
+		}
+	}
 }
 
 function createElementText(nameValue, appendValue) {
@@ -136,22 +148,26 @@ function createElementInput(idValue, typeValue, nameValue, valueValue, appendVal
 }
 
 function createElementLabelAndInput(idValue, typeValue, nameValue, valueValue, appendValue, countValue, parentValue) {
-	createLabel(idValue+countValue, nameValue, appendValue);
-	createInput(idValue+countValue, typeValue, nameValue, valueValue, appendValue);
+
+	
+	createElementLabel(idValue+countValue, nameValue, appendValue);
+	createElementInput(idValue+countValue, typeValue, nameValue, valueValue, appendValue);
 
         // Change	
-	$('#'+idValue+changeValue).on('change', { value : countValue }, function(event) {
-		alert(idValue+countValue+' change called');
-		var numElements = $(parentValue).children(nameValue).eq(countValue - 1).children(idValue).length
-		$(parentValue).children(nameValue).eq(countValue - 1).text($('#'+idValue+event.data.value).val());
+	$('#'+idValue+countValue).on('change', { value : countValue }, function(event) {
+		
+		var numElements = $(parentValue).children(nameValue).eq(countValue).children(idValue).length
+		$(parentValue).children(nameValue).eq(countValue).text($('#'+idValue+event.data.value).val());
 	});
 }
 
 function addTitleInfoElements() {
 
-	var num     = $('.titleInfoInstance').length; 
+	var num     = $('#titleInfo > .titleInfoInstance').length; 
 	
 	if(num == undefined) num = 0;
+
+	
 
 	createElement(TitleInfo, $(window.MyVariables.xml).find("mods"), num, '#titleInfo', 2);
 
@@ -366,6 +382,12 @@ var Title = {
 	},
 	"isSingleton" : function() {
 		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
 	}
 };
 
@@ -376,7 +398,7 @@ var TitleInfo = {
 	type : 'none',
 	singleton : false,
         attributes : [ ID_attr, type_attr ],
-	elements : [ ],
+	elements : [ Title ],
  
 	"getTitle" : function() {
 		return this.title;
@@ -389,6 +411,12 @@ var TitleInfo = {
 	},
 	"isSingleton" : function() {
 		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
 	}
 };
 
