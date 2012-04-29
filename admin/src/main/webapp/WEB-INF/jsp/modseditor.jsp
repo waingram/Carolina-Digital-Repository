@@ -34,18 +34,16 @@
 
 </head>
 <body>
-<p id="xmlElement"></p>
-
-<p id="someElement"></p>
-<p id="anotherElement"></p>
 
 <form id="myForm">
 <div id="titleInfo">
 
 </div>
+<br/>
     <div>
         <input type="button" id="titleAdd" value="add another title" />
     </div>
+<br/><br/>
 <div id="name"/>
 <div id="typeOfResource"/>
 <div id="genre"/>
@@ -114,13 +112,52 @@ function createElement(element, parentElement, count, containerId, indent) {
 	// set up element title and entry field if appropriate
 	if(element.getType() == 'none') {
 		createElementText(element.getTitle(), '#'+elementContainerId);
-	} else if(element.getType() == 'string') {
+	} else if(element.getType() == 'text') {
 		var valueValue = '';
 		if(existingElement) {
 			valueValue = $(parentElement).children(element.getTitle()).eq(count).text();
 		}
-		alert(elementContainerId+'_'+element.getTitle()+" "+count);
 		createElementLabelAndInput(containerId+'_'+element.getTitle(), element.getType(), element.getTitle(), valueValue, '#'+elementContainerId, count, parentElement);
+	}
+
+	$('<input>').attr({'type' : 'button', 'value' : 'X', 'id' : element.getTitle()+'Del'+count}).appendTo('#'+elementContainerId);
+	$('<br/>').appendTo('#'+elementContainerId);
+
+//	$('#'+element.getTitle()+'Del'+count).on('click', { value : count }, function(event) {
+		
+		// delete selected titleInfo from XML
+//		$(parentElement).children(element.getTitle()).eq(event.data.value).remove();
+
+		// redisplay titleInfo listing
+//TODO this is not correct
+//		$(containerId).children().remove();
+//		$(parentElement).children(element.getTitle()).each(function() { 
+//			var num     = $(containerId > '.'+element.getTitle()+'Instance').length; 
+	
+//			if(num == undefined) num = 0;
+//			createElement(element, parentElement, count, containerId, indent);
+
+//			$('<br/>').appendTo('#'+num);
+//		});
+//	 });
+
+
+	// add attributes
+	var attributesArray = element.getAttributes();
+	// add attribute div show/hide button
+	$('<input>').attr({'type' : 'button', 'value' : 'Attributes', 'id' : elementContainerId+'_attrs'}).appendTo('#'+elementContainerId);
+	$('#'+elementContainerId+'_attrs').on('click', function() { 
+		$('#'+elementContainerId+'_attrsDiv').toggle();
+	});	
+
+	// add attribute div hidden
+	$('<br/>').appendTo('#'+elementContainerId);
+	$('<div/>').attr({'id' : elementContainerId+'_attrsDiv'}).appendTo('#'+elementContainerId).hide();
+
+	// populate attribute div with attribute entry fields
+	for (var i = 0; i < attributesArray.length; i++) {				
+		createAttribute(elementContainerId+"_"+attributesArray[i].getTitle(), attributesArray[i], $(parentElement), element.getTitle(), count, '#'+elementContainerId+'_attrsDiv', 2);
+		$('<br/>').appendTo('#'+elementContainerId+'_attrsDiv');
 	}
 
 	// add elements
@@ -129,10 +166,36 @@ function createElement(element, parentElement, count, containerId, indent) {
 		var elementCount = $(parentElement).children(element.getTitle()).eq(count).children(elementsArray[i].getTitle()).length;
 	
 		for(var j = 0; j < elementCount; j++) {
-			
 			createElement(elementsArray[i], $(parentElement).children(element.getTitle()).eq(count), j, '#'+elementContainerId, 4);
 		}
 	}
+}
+
+function createAttribute(idValue, attributeValue, parentValue, nameValue, countValue, appendValue, indentValue) {
+	$('<label/>').attr({'for' : idValue }).text(attributeValue.getTitle()).appendTo(appendValue);
+
+	if(attributeValue.getType() == 'text') {
+		$('<input/>').attr({'id' : idValue, 'type' : 'text', 'name' : attributeValue.getTitle(), 'value' : ''}).appendTo(appendValue);
+	} else if(attributeValue.getType() == 'selection') {
+
+		var selectionValues = attributeValue.getValues();
+
+		var s = $('<select />').attr({'id' : idValue, 'name' : attributeValue.getTitle()}).appendTo(appendValue);
+
+		for(var val in selectionValues) {
+    			$('<option />', {value: selectionValues[val], text: selectionValues[val]}).appendTo(s);
+		}
+	}
+
+       // Change	
+	$('#'+idValue).on('change', function(event) {	
+		if($('#'+idValue).val()) {
+			$(parentValue).children(nameValue).eq(countValue).attr(attributeValue.getTitle(), $('#'+idValue).val());
+		} else {
+			// remove empty attribute
+			$(parentValue).children(nameValue).eq(countValue).removeAttr(attributeValue.getTitle());
+		}
+	});
 }
 
 function createElementText(nameValue, appendValue) {
@@ -154,9 +217,7 @@ function createElementLabelAndInput(idValue, typeValue, nameValue, valueValue, a
 	createElementInput(idValue+countValue, typeValue, nameValue, valueValue, appendValue);
 
         // Change	
-	$('#'+idValue+countValue).on('change', { value : countValue }, function(event) {
-		
-		var numElements = $(parentValue).children(nameValue).eq(countValue).children(idValue).length
+	$('#'+idValue+countValue).on('change', { value : countValue }, function(event) {		
 		$(parentValue).children(nameValue).eq(countValue).text($('#'+idValue+event.data.value).val());
 	});
 }
@@ -173,18 +234,6 @@ function addTitleInfoElements() {
 
 	$('<br/>').appendTo('#titleInfoInstance'+num);
 
-//	$('<input>').attr({'type' : 'button', 'value' : 'X', 'id' : 'titleDel'+newNum}).appendTo('#titleDiv'+newNum);
-//	$('<br/>').appendTo('#titleDiv'+newNum);
-
-//	$('#titleDel'+newNum).on('click', { value : newNum -1 }, function(event) {
-//		alert('titleDel'+event.data.value+' called!');
-//		// delete selected titleInfo from XML
-//		$(window.MyVariables.xml).find("mods").children('titleInfo').eq(event.data.value).remove();
-
-//		// redisplay titleInfo listing
-//		$('#titleInfo').children().remove();
-//		$(window.MyVariables.xml).find('mods').children("titleInfo").each(function() { addTitleInfo(); });
-//	 });
 
 }
 
@@ -270,7 +319,7 @@ function setupEditor(xml)
 //  $(window.MyVariables.xml).find("mods").children("titleInfo").eq(0).children("fakeElement").removeAttr("test");
 
   // preload the title
-  $(xml).find('mods').children("titleInfo").each(function() { addTitleInfoElements(); });
+  $(window.MyVariables.xml).find('mods').children("titleInfo").each(function() { addTitleInfoElements(); });
 
 }
 
@@ -327,7 +376,7 @@ function xml2Str(xmlNode)
 
 var ID_attr = {
 	title : 'ID',
-	type : 'string',
+	type : 'text',
 	defaultValue : null,
 	values : [],
 	"getTitle" : function() {
@@ -348,7 +397,7 @@ var type_attr = {
 	title : 'type',
 	type : 'selection',
 	defaultValue : null,
-	values : ['abbreviated', 'translated', 'alternative', 'uniform'],
+	values : ['','abbreviated', 'translated', 'alternative', 'uniform'],
 	"getTitle" : function() {
 		return this.title;
 	},
@@ -366,7 +415,7 @@ var type_attr = {
 var Title = {
 	title : 'title',
 	repeatable : true,
-	type : 'string',
+	type : 'text',
 	singleton : false,
         attributes : [ ],
 	elements : [ ],
