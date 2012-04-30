@@ -121,25 +121,24 @@ function createElement(element, parentElement, count, containerId, indent) {
 	}
 
 	$('<input>').attr({'type' : 'button', 'value' : 'X', 'id' : element.getTitle()+'Del'+count}).appendTo('#'+elementContainerId);
-	$('<br/>').appendTo('#'+elementContainerId);
-
-//	$('#'+element.getTitle()+'Del'+count).on('click', { value : count }, function(event) {
+	
+	$('#'+element.getTitle()+'Del'+count).on('click', { value : count }, function(event) {
 		
 		// delete selected titleInfo from XML
-//		$(parentElement).children(element.getTitle()).eq(event.data.value).remove();
+		$(parentElement).children(element.getTitle()).eq(event.data.value).remove();
 
 		// redisplay titleInfo listing
-//TODO this is not correct
-//		$(containerId).children().remove();
-//		$(parentElement).children(element.getTitle()).each(function() { 
-//			var num     = $(containerId > '.'+element.getTitle()+'Instance').length; 
+		$(containerId).children("."+element.getTitle()+'Instance').remove();
+		$(parentElement).children(element.getTitle()).each(function() { 
+			var num = $(containerId > '.'+element.getTitle()+'Instance').length; 
 	
-//			if(num == undefined) num = 0;
-//			createElement(element, parentElement, count, containerId, indent);
+			if(num == undefined) num = 0;
 
-//			$('<br/>').appendTo('#'+num);
-//		});
-//	 });
+			alert(element.getTitle()+' '+num);
+
+			createElement(element, parentElement, num, containerId, indent);
+		});
+	 });
 
 
 	// add attributes
