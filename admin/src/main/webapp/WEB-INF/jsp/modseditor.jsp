@@ -134,33 +134,55 @@ function createElement(element, parentElement, count, containerId, indent) {
 	
 			if(num == undefined) num = 0;
 
-			alert(element.getTitle()+' '+num);
-
 			createElement(element, parentElement, num, containerId, indent);
 		});
 	 });
 
 
+
 	// add attributes
 	var attributesArray = element.getAttributes();
-	// add attribute div show/hide button
-	$('<input>').attr({'type' : 'button', 'value' : 'Attributes', 'id' : elementContainerId+'_attrs'}).appendTo('#'+elementContainerId);
-	$('#'+elementContainerId+'_attrs').on('click', function() { 
-		$('#'+elementContainerId+'_attrsDiv').toggle();
-	});	
+	var hasAttributes = (attributesArray.length > 0 ? true : false);
 
-	// add attribute div hidden
-	$('<br/>').appendTo('#'+elementContainerId);
-	$('<div/>').attr({'id' : elementContainerId+'_attrsDiv'}).appendTo('#'+elementContainerId).hide();
+	if(hasAttributes) {
+		// add attribute div show/hide button
+		$('<input>').attr({'type' : 'button', 'value' : 'Attributes', 'id' : elementContainerId+'_attrs'}).appendTo('#'+elementContainerId);
+		$('#'+elementContainerId+'_attrs').on('click', function() { 
+			$('#'+elementContainerId+'_attrsDiv').toggle();
+		});	
+	}
 
-	// populate attribute div with attribute entry fields
-	for (var i = 0; i < attributesArray.length; i++) {				
-		createAttribute(elementContainerId+"_"+attributesArray[i].getTitle(), attributesArray[i], $(parentElement), element.getTitle(), count, '#'+elementContainerId+'_attrsDiv', 2);
-		$('<br/>').appendTo('#'+elementContainerId+'_attrsDiv');
+	// add element buttons
+	var elementsArray = element.getElements();
+	for (var i = 0; i < elementsArray.length; i++) {
+		var childElement = elementsArray[i];
+
+		$('<input>').attr({'type' : 'button', 'value' : 'Add '+childElement.getTitle(), 'id' : elementContainerId+'_'+'Add'}).appendTo('#'+elementContainerId);
+
+		$('#'+elementContainerId+'_'+'Add').on('click', function(event) {
+		
+			var num = $('#'+elementContainerId).children("."+childElement.getTitle()+'Instance').length; 
+
+			if(num == undefined) num = 0; // if no elements, start with zero
+
+			createElement(childElement, $(parentElement).children(element.getTitle()).eq(count), num, '#'+elementContainerId, indent);
+		});
+	}
+
+	
+	if(hasAttributes) {
+		// add attribute div hidden
+		$('<br/>').appendTo('#'+elementContainerId);
+		$('<div/>').attr({'id' : elementContainerId+'_attrsDiv'}).appendTo('#'+elementContainerId).hide();
+
+		// populate attribute div with attribute entry fields
+		for (var i = 0; i < attributesArray.length; i++) {				
+			createAttribute(elementContainerId+"_"+attributesArray[i].getTitle(), attributesArray[i], parentElement, element.getTitle(), count, '#'+elementContainerId+'_attrsDiv', 2);
+			$('<br/>').appendTo('#'+elementContainerId+'_attrsDiv');
+		}
 	}
 
 	// add elements
-	var elementsArray = element.getElements();
 	for (var i = 0; i < elementsArray.length; i++) {
 		var elementCount = $(parentElement).children(element.getTitle()).eq(count).children(elementsArray[i].getTitle()).length;
 	
@@ -168,6 +190,9 @@ function createElement(element, parentElement, count, containerId, indent) {
 			createElement(elementsArray[i], $(parentElement).children(element.getTitle()).eq(count), j, '#'+elementContainerId, 4);
 		}
 	}
+
+	
+	$('<br/><br/>').appendTo('#'+elementContainerId);
 }
 
 function createAttribute(idValue, attributeValue, parentValue, nameValue, countValue, appendValue, indentValue) {
