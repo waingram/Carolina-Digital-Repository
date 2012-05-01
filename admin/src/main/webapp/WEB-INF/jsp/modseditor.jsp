@@ -41,7 +41,7 @@
 </div>
 <br/>
     <div>
-        <input type="button" id="titleAdd" value="add another title" />
+        <input type="button" id="titleInfoAdd" value="Add titleInfo" />
     </div>
 <br/><br/>
 <div id="name"/>
@@ -85,7 +85,7 @@ window.MyVariables.xml = {};
 
 
 // set up button callbacks
-$('#titleAdd').click(function() { addTitleInfo(); });
+$('#titleInfoAdd').click(function() { addTitleInfoElements(); });
 
 $('#sendXML').click(function() { sendXML(); });
 
@@ -103,9 +103,11 @@ function createElement(element, parentElement, count, containerId, indent) {
 
 	// See if element already exists.  If not, create it and add it to xml document
 	var numElements = $(parentElement).children(element.getTitle()).length
-	if( numElements >= count ) {
+	//alert("numElements: "+numElements+' count: '+count);
+	if( numElements > count ) {
 		existingElement = true;
 	} else {
+		//alert("creating element in XML: "+element.getTitle());
 		$('<'+element.getTitle()+'/>').appendTo(parentElement);
 	}
 
@@ -117,7 +119,7 @@ function createElement(element, parentElement, count, containerId, indent) {
 		if(existingElement) {
 			valueValue = $(parentElement).children(element.getTitle()).eq(count).text();
 		}
-		createElementLabelAndInput(containerId+'_'+element.getTitle(), element.getType(), element.getTitle(), valueValue, '#'+elementContainerId, count, parentElement);
+		createElementLabelAndInput(cleanContainerId+'_'+element.getTitle(), element.getType(), element.getTitle(), valueValue, '#'+elementContainerId, count, parentElement);
 	}
 
 	$('<input>').attr({'type' : 'button', 'value' : 'X', 'id' : element.getTitle()+'Del'+count}).appendTo('#'+elementContainerId);
@@ -223,11 +225,11 @@ function createAttribute(idValue, attributeValue, parentValue, nameValue, countV
 }
 
 function createElementText(nameValue, appendValue) {
-		$('<h3/>').text(nameValue).appendTo(appendValue);
+		$('<p/>').text(nameValue+' ').appendTo(appendValue);
 }
 
 function createElementLabel(forValue, nameValue, appendValue) {
-		$('<label/>').attr({'for' : forValue }).text(nameValue).appendTo(appendValue);
+		$('<label/>').attr({'for' : forValue }).text(nameValue+' ').appendTo(appendValue);
 }
 
 function createElementInput(idValue, typeValue, nameValue, valueValue, appendValue) {
@@ -241,7 +243,7 @@ function createElementLabelAndInput(idValue, typeValue, nameValue, valueValue, a
 	createElementInput(idValue+countValue, typeValue, nameValue, valueValue, appendValue);
 
         // Change	
-	$('#'+idValue+countValue).on('change', { value : countValue }, function(event) {		
+	$('#'+idValue+countValue).on('change', { value : countValue }, function(event) {	
 		$(parentValue).children(nameValue).eq(countValue).text($('#'+idValue+event.data.value).val());
 	});
 }
@@ -252,8 +254,6 @@ function addTitleInfoElements() {
 	
 	if(num == undefined) num = 0;
 
-	
-
 	createElement(TitleInfo, $(window.MyVariables.xml).find("mods"), num, '#titleInfo', 2);
 
 	$('<br/>').appendTo('#titleInfoInstance'+num);
@@ -263,74 +263,6 @@ function addTitleInfoElements() {
 
 
 
-
-function createLabelAndInput(textValue, idValue, typeValue, nameValue, valueValue, appendValue, changeValue, objectValue) {
-	createLabel(idValue+changeValue, textValue, appendValue);
-	createInput(idValue+changeValue, typeValue, nameValue, valueValue, appendValue);
-
-        // Change	
-	$('#'+idValue+changeValue).on('change', { value : changeValue }, function(event) {
-		alert(idValue+changeValue+' change called');
-		var numElements = $(window.MyVariables.xml).find("mods").children(objectValue).eq(changeValue - 1).children(idValue).length
-		if( numElements == 0 ){
-			$('<'+idValue+'/>').appendTo($(window.MyVariables.xml).find("mods").children(objectValue).eq(changeValue - 1));
-		}
-		$(window.MyVariables.xml).find("mods").children(objectValue).eq(changeValue - 1).children(idValue).eq(0).text($('#'+idValue+event.data.value).val());
-	});
-}
-
-function createLabel(forValue, textValue, appendValue) {
-	$('<label/>').attr({'for' : forValue }).text(textValue).appendTo(appendValue);
-}
-
-function createInput(idValue, typeValue, nameValue, valueValue, appendValue) {
-	$('<input/>').attr({'id' : idValue, 'type' : typeValue, 'name' : nameValue, 'value' : valueValue}).appendTo(appendValue);
-}
-
-function addTitleInfo() {
-
-	var num     = $('.titleInput').length; 
-	
-	if(num == undefined) num = 0;
-
-	var newNum  = new Number(num + 1);      // the numeric ID of the new input field being added
-
-	var newElem = $('<div/>').attr({'id' : 'titleDiv'+newNum, 'class' : 'titleInput'}).appendTo('#titleInfo');
-	createLabelAndInput('Title', 'title', 'text', 'title'+newNum, $(window.MyVariables.xml).find("mods").children("titleInfo").eq(newNum - 1).children("title").eq(0).text(), '#titleDiv'+newNum, newNum, 'titleInfo');
-	$('<br/>').appendTo('#titleDiv'+newNum);
-	createLabelAndInput('Subtitle', 'subTitle', 'text', 'subTitle'+newNum, $(window.MyVariables.xml).find("mods").children("titleInfo").eq(newNum - 1).children("subTitle").eq(0).text(), '#titleDiv'+newNum, newNum, 'titleInfo');
-	$('<br/>').appendTo('#titleDiv'+newNum);
-//	createLabelAndInput('Part Number', 'partNumber'+newNum, 'text', 'partNumber'+newNum, $(window.MyVariables.xml).find("titleInfo").eq(newNum - 1).find("partNumber").eq(0).text(), '#titleDiv'+newNum, newNum, $(window.MyVariables.xml).find("titleInfo").eq(newNum - 1).find("partNumber").eq(0));
-	$('<br/>').appendTo('#titleDiv'+newNum);
-//	createLabelAndInput('Part Name', 'partName'+newNum, 'text', 'partName'+newNum, $(window.MyVariables.xml).find("titleInfo").eq(newNum - 1).find("partName").eq(0).text(), '#titleDiv'+newNum, newNum, $(window.MyVariables.xml).find("titleInfo").eq(newNum - 1).find("partName").eq(0));
-	$('<br/>').appendTo('#titleDiv'+newNum);
-//	createLabelAndInput('Non Sort', 'nonSort'+newNum, 'text', 'nonSort'+newNum, $(window.MyVariables.xml).find("titleInfo").eq(newNum - 1).find("nonSort").eq(0).text(), '#titleDiv'+newNum, newNum, $(window.MyVariables.xml).find("nonSort").eq(newNum - 1).find("title").eq(0));
-
-	$('<input>').attr({'type' : 'button', 'value' : 'X', 'id' : 'titleDel'+newNum}).appendTo('#titleDiv'+newNum);
-	$('<br/>').appendTo('#titleDiv'+newNum);
-
-	$('#titleDel'+newNum).on('click', { value : newNum -1 }, function(event) {
-		alert('titleDel'+event.data.value+' called!');
-		// delete selected titleInfo from XML
-		$(window.MyVariables.xml).find("mods").children('titleInfo').eq(event.data.value).remove();
-
-		// redisplay titleInfo listing
-		$('#titleInfo').children().remove();
-		$(window.MyVariables.xml).find('mods').children("titleInfo").each(function() { addTitleInfo(); });
-	 });
-
-}
-
-function deleteTitleInfo() {
-       var num = $('.titleInput').length;
-	if(num == undefined) num = 0;
-
-        if(num > 0) $('#titleDiv' + num).remove();     // remove the last element
- 
-        // if only one element remains, disable the "remove" button
-        if (num == 1)
-               $('#titleDel').attr('disabled','disabled');
-}
 
 
 function setupEditor(xml)
