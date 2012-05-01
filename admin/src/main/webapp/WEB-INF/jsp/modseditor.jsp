@@ -122,9 +122,9 @@ function createElement(element, parentElement, count, containerId, indent) {
 		createElementLabelAndInput(cleanContainerId+'_'+element.getTitle(), element.getType(), element.getTitle(), valueValue, '#'+elementContainerId, count, parentElement);
 	}
 
-	$('<input>').attr({'type' : 'button', 'value' : 'X', 'id' : element.getTitle()+'Del'+count}).appendTo('#'+elementContainerId);
+	$('<input>').attr({'type' : 'button', 'value' : 'X', 'id' : cleanContainerId+'_'+element.getTitle()+'Del'+count}).appendTo('#'+elementContainerId);
 	
-	$('#'+element.getTitle()+'Del'+count).on('click', { value : count }, function(event) {
+	$('#'+cleanContainerId+'_'+element.getTitle()+'Del'+count).on('click', { value : count }, function(event) {
 		
 		// delete selected titleInfo from XML
 		$(parentElement).children(element.getTitle()).eq(event.data.value).remove();
@@ -155,23 +155,10 @@ function createElement(element, parentElement, count, containerId, indent) {
 	}
 
 	// add element buttons
-	var elementsArray = element.getElements();
-	for (var i = 0; i < elementsArray.length; i++) {
-		var childElement = elementsArray[i];
+	addElementButtons(element, elementContainerId, parentElement, count, indent);
 
-		$('<input>').attr({'type' : 'button', 'value' : 'Add '+childElement.getTitle(), 'id' : elementContainerId+'_'+'Add'}).appendTo('#'+elementContainerId);
 
-		$('#'+elementContainerId+'_'+'Add').on('click', function(event) {
-		
-			var num = $('#'+elementContainerId).children("."+childElement.getTitle()+'Instance').length; 
-
-			if(num == undefined) num = 0; // if no elements, start with zero
-
-			createElement(childElement, $(parentElement).children(element.getTitle()).eq(count), num, '#'+elementContainerId, indent);
-		});
-	}
-
-	
+	// attribute div	
 	if(hasAttributes) {
 		// add attribute div hidden
 		$('<br/>').appendTo('#'+elementContainerId);
@@ -185,6 +172,7 @@ function createElement(element, parentElement, count, containerId, indent) {
 	}
 
 	// add elements
+	var elementsArray = element.getElements();
 	for (var i = 0; i < elementsArray.length; i++) {
 		var elementCount = $(parentElement).children(element.getTitle()).eq(count).children(elementsArray[i].getTitle()).length;
 	
@@ -196,6 +184,26 @@ function createElement(element, parentElement, count, containerId, indent) {
 	
 	$('<br/><br/>').appendTo('#'+elementContainerId);
 }
+
+
+function addElementButtons(element, elementContainerId, parentElement, count, indent) {
+	var elementsArray = element.getElements();
+	for (var i = 0; i < elementsArray.length; i++) {
+
+		$('<input>').attr({'type' : 'button', 'value' : 'Add '+elementsArray[i].getTitle(), 'id' : elementContainerId+'_'+elementsArray[i].getTitle()+'_Add'}).appendTo('#'+elementContainerId);
+
+		$('#'+elementContainerId+'_'+elementsArray[i].getTitle()+'_Add').on('click', { value : i }, function(event) {
+		
+			var elementsArray = element.getElements();
+			var num = $('#'+elementContainerId).children("."+elementsArray[event.data.value].getTitle()+'Instance').length; 
+
+			if(num == undefined) num = 0; // if no elements, start with zero
+
+			createElement(elementsArray[event.data.value], $(parentElement).children(element.getTitle()).eq(count), num, '#'+elementContainerId, indent);
+		});
+	}
+}
+
 
 function createAttribute(idValue, attributeValue, parentValue, nameValue, countValue, appendValue, indentValue) {
 	$('<label/>').attr({'for' : idValue }).text(attributeValue.getTitle()).appendTo(appendValue);
@@ -330,6 +338,253 @@ function xml2Str(xmlNode)
   return false;
 }
 
+var nameTitleGroup_attr = {
+	title : 'nameTitleGroup',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var altRepGroup_attr = {
+	title : 'altRepGroup',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var usage_attr = {
+	title : 'usage',
+	type : 'text',
+	defaultValue : 'primary',
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var supplied_attr = {
+	title : 'supplied',
+	type : 'text',
+	defaultValue : 'yes',
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var displayLabel_attr = {
+	title : 'displayLabel',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var valueURI_attr = {
+	title : 'valueURI',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var authorityURI_attr = {
+	title : 'authorityURI',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var authority_attr = {
+	title : 'authority',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var transliteration_attr = {
+	title : 'transliteration',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var script_attr = {
+	title : 'script',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var xmllang_attr = {
+	title : 'xml:lang',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var lang_attr = {
+	title : 'lang',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var xlink_attr = {
+	title : 'xlink',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
 var ID_attr = {
 	title : 'ID',
 	type : 'text',
@@ -373,7 +628,7 @@ var Title = {
 	repeatable : true,
 	type : 'text',
 	singleton : false,
-        attributes : [ ],
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
 	elements : [ ],
  
 	"getTitle" : function() {
@@ -396,14 +651,125 @@ var Title = {
 	}
 };
 
+var SubTitle = {
+	title : 'subTitle',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var PartNumber = {
+	title : 'partNumber',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var PartName = {
+	title : 'partName',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var NonSort = {
+	title : 'nonSort',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
 
 var TitleInfo = {
 	title : 'titleInfo',
 	repeatable : true,
 	type : 'none',
 	singleton : false,
-        attributes : [ ID_attr, type_attr ],
-	elements : [ Title ],
+        attributes : [ ID_attr, xlink_attr, xmllang_attr, script_attr, transliteration_attr, type_attr, authority_attr, authorityURI_attr, valueURI_attr, displayLabel_attr, supplied_attr, usage_attr, altRepGroup_attr, nameTitleGroup_attr ],
+	elements : [ Title, SubTitle, PartNumber, PartName, NonSort ],
  
 	"getTitle" : function() {
 		return this.title;
