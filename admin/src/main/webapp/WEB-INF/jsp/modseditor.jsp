@@ -37,7 +37,6 @@
 
 <form id="myForm">
 <div id="titleInfo">
-
 </div>
 <br/>
     <div>
@@ -45,24 +44,45 @@
     </div>
 <br/><br/>
 <div id="name"/>
-<div id="typeOfResource"/>
-<div id="genre"/>
-<div id="originInfo"/>
-<div id="language"/>
-<div id="physicalDescription"/>
-<div id="abstract"/>
-<div id="tableOfContents"/>
-<div id="targetAudience"/>
-<div id="note"/>
-<div id="subject"/>
-<div id="classification"/>
-<div id="relatedItem"/>
-<div id="identifier"/>
-<div id="location"/>
-<div id="accessCondition"/>
-<div id="part"/>
-<div id="extension"/>
-<div id="recordInfo"/>
+</div>
+<br/>
+    <div>
+        <input type="button" id="nameAdd" value="Add name" />
+    </div>
+<br/><br/>
+<div id="typeOfResource"></div>
+<br/>
+    <div>
+        <input type="button" id="typeOfResourceAdd" value="Add typeOfResource" />
+    </div>
+<br/><br/>
+<div id="genre"></div>
+<br/>
+    <div>
+        <input type="button" id="genreAdd" value="Add genre" />
+    </div>
+<br/><br/>
+<div id="originInfo"></div>
+<br/>
+    <div>
+        <input type="button" id="originInfoAdd" value="Add originInfo" />
+    </div>
+<br/><br/>
+<div id="language"></div>
+<div id="physicalDescription"></div>
+<div id="abstract"></div>
+<div id="tableOfContents"></div>
+<div id="targetAudience"></div>
+<div id="note"></div>
+<div id="subject"></div>
+<div id="classification"></div>
+<div id="relatedItem"></div>
+<div id="identifier"></div>
+<div id="location"></div>
+<div id="accessCondition"></div>
+<div id="part"></div>
+<div id="extension"></div>
+<div id="recordInfo"></div>
 
 <input type="button" id="sendXML" value="Submit Changes" />
 </form>
@@ -86,6 +106,19 @@ window.MyVariables.xml = {};
 
 // set up button callbacks
 $('#titleInfoAdd').click(function() { addTitleInfoElements(); });
+$('#nameAdd').click(function() { addNameElements(); });
+$('#typeOfResourceAdd').click(function() { addTypeOfResourceElements(); });
+$('#genreAdd').click(function() { addGenreElements(); });
+$('#originInfoAdd').click(function() { addOriginInfoElements(); });
+$('#Add').click(function() { addElements(); });
+$('#Add').click(function() { addElements(); });
+$('#Add').click(function() { addElements(); });
+$('#Add').click(function() { addElements(); });
+$('#Add').click(function() { addElements(); });
+$('#Add').click(function() { addElements(); });
+$('#Add').click(function() { addElements(); });
+$('#Add').click(function() { addElements(); });
+$('#Add').click(function() { addElements(); });
 
 $('#sendXML').click(function() { sendXML(); });
 
@@ -114,12 +147,12 @@ function createElement(element, parentElement, count, containerId, indent) {
 	// set up element title and entry field if appropriate
 	if(element.getType() == 'none') {
 		createElementText(element.getTitle(), '#'+elementContainerId);
-	} else if(element.getType() == 'text') {
+	} else {
 		var valueValue = '';
 		if(existingElement) {
 			valueValue = $(parentElement).children(element.getTitle()).eq(count).text();
 		}
-		createElementLabelAndInput(cleanContainerId+'_'+element.getTitle(), element.getType(), element.getTitle(), valueValue, '#'+elementContainerId, count, parentElement);
+		createElementLabelAndInput(element, cleanContainerId+'_'+element.getTitle(), valueValue, '#'+elementContainerId, count, parentElement);
 	}
 
 	$('<input>').attr({'type' : 'button', 'value' : 'X', 'id' : cleanContainerId+'_'+element.getTitle()+'Del'+count}).appendTo('#'+elementContainerId);
@@ -155,8 +188,10 @@ function createElement(element, parentElement, count, containerId, indent) {
 	}
 
 	// add element buttons
-	addElementButtons(element, elementContainerId, parentElement, count, indent);
-
+	var elementsArray = element.getElements();
+	for (var i = 0; i < elementsArray.length; i++) {
+		addElementButton(element, elementContainerId, parentElement, elementsArray[i], count, indent);
+	}
 
 	// attribute div	
 	if(hasAttributes) {
@@ -186,21 +221,21 @@ function createElement(element, parentElement, count, containerId, indent) {
 }
 
 
-function addElementButtons(element, elementContainerId, parentElement, count, indent) {
-	var elementsArray = element.getElements();
-	for (var i = 0; i < elementsArray.length; i++) {
+function addElementButton(element, elementContainerId, parentElement, childElement, count, indent) {
 
-		$('<input>').attr({'type' : 'button', 'value' : 'Add '+elementsArray[i].getTitle(), 'id' : elementContainerId+'_'+elementsArray[i].getTitle()+'_Add'}).appendTo('#'+elementContainerId);
+		$('<input>').attr({'type' : 'button', 'value' : 'Add '+childElement.getTitle(), 'id' : elementContainerId+'_'+childElement.getTitle()+'_Add'}).appendTo('#'+elementContainerId);
 
-		$('#'+elementContainerId+'_'+elementsArray[i].getTitle()+'_Add').on('click', { value : i }, function(event) {
-		
-			var elementsArray = element.getElements();
-			var num = $('#'+elementContainerId).children("."+elementsArray[event.data.value].getTitle()+'Instance').length; 
+		$('#'+elementContainerId+'_'+childElement.getTitle()+'_Add').on('click', addElementButtonCallback(element, elementContainerId, parentElement, childElement, count, indent));
+}
 
-			if(num == undefined) num = 0; // if no elements, start with zero
+function addElementButtonCallback(element, elementContainerId, parentElement, childElement, count, indent) {
+	return function() {	
+		var elementsArray = element.getElements();
+		var num = $('#'+elementContainerId).children("."+childElement.getTitle()+'Instance').length; 
 
-			createElement(elementsArray[event.data.value], $(parentElement).children(element.getTitle()).eq(count), num, '#'+elementContainerId, indent);
-		});
+		if(num == undefined) num = 0; // if no elements, start with zero
+
+		createElement(childElement, $(parentElement).children(element.getTitle()).eq(count), num, '#'+elementContainerId, indent);
 	}
 }
 
@@ -208,16 +243,30 @@ function addElementButtons(element, elementContainerId, parentElement, count, in
 function createAttribute(idValue, attributeValue, parentValue, nameValue, countValue, appendValue, indentValue) {
 	$('<label/>').attr({'for' : idValue }).text(attributeValue.getTitle()).appendTo(appendValue);
 
+	var value = $(parentValue).children(nameValue).eq(countValue).attr(attributeValue.getTitle());
+
+	if(value) {
+		; // Should I do any cleanup/formatting?
+		
+	} else if(attributeValue.getDefault()) {
+		value = attributeValue.getDefault();
+	} else value = '';
+
 	if(attributeValue.getType() == 'text') {
-		$('<input/>').attr({'id' : idValue, 'type' : 'text', 'name' : attributeValue.getTitle(), 'value' : ''}).appendTo(appendValue);
+		$('<input/>').attr({'id' : idValue, 'type' : 'text', 'name' : attributeValue.getTitle(), 'value' : value}).appendTo(appendValue);
 	} else if(attributeValue.getType() == 'selection') {
 
 		var selectionValues = attributeValue.getValues();
 
-		var s = $('<select />').attr({'id' : idValue, 'name' : attributeValue.getTitle()}).appendTo(appendValue);
+		var s = $('<select />').attr({'id' : idValue, 'name' : attributeValue.getTitle(), 'value' : value}).appendTo(appendValue);
 
 		for(var val in selectionValues) {
-    			$('<option />', {value: selectionValues[val], text: selectionValues[val]}).appendTo(s);
+
+			if(value == selectionValues[val]) {				
+	    			$('<option />', {value: selectionValues[val], text: selectionValues[val], selected : true}).appendTo(s);
+			} else {
+    				$('<option />', {value: selectionValues[val], text: selectionValues[val]}).appendTo(s);
+			}
 		}
 	}
 
@@ -240,35 +289,84 @@ function createElementLabel(forValue, nameValue, appendValue) {
 		$('<label/>').attr({'for' : forValue }).text(nameValue+' ').appendTo(appendValue);
 }
 
-function createElementInput(idValue, typeValue, nameValue, valueValue, appendValue) {
-	$('<input/>').attr({'id' : idValue, 'type' : typeValue, 'name' : nameValue, 'value' : valueValue}).appendTo(appendValue);
+function createElementInput(element, idValue, valueValue, appendValue) {
+	if(element.getType() == 'text') {
+		$('<input/>').attr({'id' : idValue, 'type' : element.getType(), 'name' : element.getTitle(), 'value' : valueValue}).appendTo(appendValue);
+	} else if(element.getType() == 'selection') {
+
+		var selectionValues = element.getValues();
+
+		var s = $('<select />').attr({'id' : idValue, 'name' : element.getTitle(), 'value' : valueValue}).appendTo(appendValue);
+
+		for(var val in selectionValues) {
+
+			if(valueValue == selectionValues[val]) {				
+	    			$('<option />', {value: selectionValues[val], text: selectionValues[val], selected : true}).appendTo(s);
+			} else {
+    				$('<option />', {value: selectionValues[val], text: selectionValues[val]}).appendTo(s);
+			}
+		}
+	}
+
 }
 
-function createElementLabelAndInput(idValue, typeValue, nameValue, valueValue, appendValue, countValue, parentValue) {
+function createElementChangeCallback(element, parentValue, countValue) {
+	return function() {
+		$(parentValue).children(nameValue).eq(countValue).text($('#'+idValue+event.data.value).val());
+	}
+}
 
-	
-	createElementLabel(idValue+countValue, nameValue, appendValue);
-	createElementInput(idValue+countValue, typeValue, nameValue, valueValue, appendValue);
+function createElementLabelAndInput(element, idValue, valueValue, appendValue, countValue, parentValue) {
+	createElementLabel(idValue+countValue, element.getTitle(), appendValue);
+	createElementInput(element, idValue+countValue, valueValue, appendValue);
 
         // Change	
-	$('#'+idValue+countValue).on('change', { value : countValue }, function(event) {	
-		$(parentValue).children(nameValue).eq(countValue).text($('#'+idValue+event.data.value).val());
-	});
+	$('#'+idValue+countValue).on('change', createElementChangeCallback(element, parentValue, countValue));	
 }
 
 function addTitleInfoElements() {
 
-	var num     = $('#titleInfo > .titleInfoInstance').length; 
+	var num = $('#titleInfo > .titleInfoInstance').length; 
 	
 	if(num == undefined) num = 0;
 
 	createElement(TitleInfo, $(window.MyVariables.xml).find("mods"), num, '#titleInfo', 2);
+}
+function addNameElements() {
 
-	$('<br/>').appendTo('#titleInfoInstance'+num);
-
-
+	var num = $('#name > .nameInstance').length; 
+	
+	if(num == undefined) num = 0;
+	
+	createElement(Name, $(window.MyVariables.xml).find("mods"), num, '#name', 2);
 }
 
+function addTypeOfResourceElements() {
+
+	var num = $('#name > .typeOfResourceInstance').length; 
+	
+	if(num == undefined) num = 0;
+	
+	createElement(TypeOfResource, $(window.MyVariables.xml).find("mods"), num, '#typeOfResource', 2);
+}
+
+function addGenreElements() {
+
+	var num = $('#name > .genreInstance').length; 
+	
+	if(num == undefined) num = 0;
+	
+	createElement(Genre, $(window.MyVariables.xml).find("mods"), num, '#genre', 2);
+}
+
+function addOriginInfoElements() {
+
+	var num = $('#name > .originInfoInstance').length; 
+	
+	if(num == undefined) num = 0;
+	
+	createElement(OriginInfo, $(window.MyVariables.xml).find("mods"), num, '#originInfo', 2);
+}
 
 
 
@@ -284,7 +382,10 @@ function setupEditor(xml)
 
   // preload the title
   $(window.MyVariables.xml).find('mods').children("titleInfo").each(function() { addTitleInfoElements(); });
-
+  $(window.MyVariables.xml).find('mods').children("name").each(function() { addNameElements(); });
+  $(window.MyVariables.xml).find('mods').children("typeOfResource").each(function() { addTypeOfResourceElements(); });
+  $(window.MyVariables.xml).find('mods').children("genre").each(function() { addGenreElements(); });
+  $(window.MyVariables.xml).find('mods').children("originInfo").each(function() { addOriginInfoElements(); });
 }
 
 // Send XML back to be stored
@@ -336,6 +437,46 @@ function xml2Str(xmlNode)
     }
   }
   return false;
+}
+
+placeTerm_type_attr, placeTerm_authority_attr
+
+var collection_attr = {
+	title : 'collection',
+	type : 'text',
+	defaultValue : 'yes',
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var manuscript_attr = {
+	title : 'manuscript',
+	type : 'text',
+	defaultValue : 'yes',
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
 }
 
 var nameTitleGroup_attr = {
@@ -471,6 +612,26 @@ var authorityURI_attr = {
 	}
 }
 
+var genre_authority_attr = {
+	title : 'authority',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+
 var authority_attr = {
 	title : 'authority',
 	type : 'text',
@@ -604,11 +765,124 @@ var ID_attr = {
 	}
 }
 
-var type_attr = {
+var placeTerm_type_attr = {
+	title : 'type',
+	type : 'selection',
+	defaultValue : null,
+	values : ['','code', 'text'],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var placeTerm_authority_attr = {
+	title : 'type',
+	type : 'selection',
+	defaultValue : null,
+	values : ['','marcgac', 'marcountry', 'iso3166'],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+var titleInfo_type_attr = {
 	title : 'type',
 	type : 'selection',
 	defaultValue : null,
 	values : ['','abbreviated', 'translated', 'alternative', 'uniform'],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var name_type_attr = {
+	title : 'type',
+	type : 'selection',
+	defaultValue : null,
+	values : ['','personal', 'corporate', 'conference', 'family'],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var namePart_type_attr = {
+	title : 'type',
+	type : 'selection',
+	defaultValue : null,
+	values : ['','date', 'family', 'given', 'termsOfAddress'],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var roleTerm_type_attr = {
+	title : 'type',
+	type : 'selection',
+	defaultValue : null,
+	values : ['','code', 'text'],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var genre_type_attr = {
+	title : 'type',
+	type : 'selection',
+	defaultValue : null,
+	values : ['','class', 'work type', 'style'],
 	"getTitle" : function() {
 		return this.title;
 	},
@@ -768,7 +1042,7 @@ var TitleInfo = {
 	repeatable : true,
 	type : 'none',
 	singleton : false,
-        attributes : [ ID_attr, xlink_attr, xmllang_attr, script_attr, transliteration_attr, type_attr, authority_attr, authorityURI_attr, valueURI_attr, displayLabel_attr, supplied_attr, usage_attr, altRepGroup_attr, nameTitleGroup_attr ],
+        attributes : [ ID_attr, xlink_attr, xmllang_attr, script_attr, transliteration_attr, titleInfo_type_attr, authority_attr, authorityURI_attr, valueURI_attr, displayLabel_attr, supplied_attr, usage_attr, altRepGroup_attr, nameTitleGroup_attr ],
 	elements : [ Title, SubTitle, PartNumber, PartName, NonSort ],
  
 	"getTitle" : function() {
@@ -791,6 +1065,749 @@ var TitleInfo = {
 	}
 };
 
+var NamePart = {
+	title : 'namePart',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ namePart_type_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
 
+var DisplayForm = {
+	title : 'displayForm',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var Affiliation = {
+	title : 'affiliation',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var RoleTerm = {
+	title : 'roleTerm',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var Role = {
+	title : 'role',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ ],
+	elements : [ RoleTerm ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var Description = {
+	title : 'description',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var Name = {
+	title : 'name',
+	repeatable : true,
+	type : 'none',
+	singleton : false,
+        attributes : [ ID_attr, xlink_attr, xmllang_attr, script_attr, transliteration_attr, name_type_attr, authority_attr, authorityURI_attr, valueURI_attr, displayLabel_attr, usage_attr, altRepGroup_attr, nameTitleGroup_attr ],
+	elements : [ NamePart, DisplayForm, Affiliation, Role, Description ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var TypeOfResource = {
+	title : 'typeOfResource',
+	repeatable : true,
+	type : 'selection',
+	singleton : false,
+	values : ['','text', 'cartographic', 'notated music', 'sound recording-musical', 'sound recording-nonmusical', 'sound recording', 'still image', 'moving image', 'three dimensional object', 'software', 'multimedia mixed material'],
+        attributes : [ collection_attr, manuscript_attr, displayLabel_attr, usage_attr, altRepGroup_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getValues" : function() {
+		return this.values;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+
+var Genre = {
+	title : 'genre',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr, genre_authority_attr, authorityURI_attr, valueURI_attr, genre_type_attr, displayLabel_attr, usage_attr, altRepGroup_attr],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var PlaceTerm = {
+	title : 'placeTerm',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ placeTerm_type_attr, placeTerm_authority_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var Place = {
+	title : 'place',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ supplied_attr ],
+	elements : [ PlaceTerm ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var Publisher = {
+	title : 'publisher',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ supplied_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+/*
+var  = {
+	title : '',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var  = {
+	title : '',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var  = {
+	title : '',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var  = {
+	title : '',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var  = {
+	title : '',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+
+var  = {
+	title : '',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+
+var  = {
+	title : '',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+
+var  = {
+	title : '',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+
+var  = {
+	title : '',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+
+var  = {
+	title : '',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+
+var  = {
+	title : '',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+
+var  = {
+	title : '',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+*/
+
+
+var OriginInfo = {
+	title : 'originInfo',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr, displayLabel_attr, altRepGroup_attr ],
+	elements : [ Place, Publisher, DateIssued, DateCreated, DateCaptured, DateValid, DateModified, CopyrightDate, DateOther, Edition, Issuance, Frequency ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+/*
+var  = {
+	title : '',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+*/
 </script>
 </body>
