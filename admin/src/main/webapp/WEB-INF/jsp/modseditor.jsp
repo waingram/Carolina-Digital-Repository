@@ -189,8 +189,19 @@ function createElement(element, parentElement, count, containerId, indent) {
 
 	// add element buttons
 	var elementsArray = element.getElements();
+	var hasElements = (elementsArray.length > 0 ? true : false);
+
+	if(hasElements) {
+		// add element div show/hide button
+		$('<input>').attr({'type' : 'button', 'value' : 'Subelements', 'id' : elementContainerId+'_elements'}).appendTo('#'+elementContainerId);
+		$('#'+elementContainerId+'_elements').on('click', function() { 
+			$('#'+elementContainerId+'_elementsDiv').toggle();
+		});	
+	}
+	$('<div/>').attr({'id' : elementContainerId+'_elementsDiv'}).appendTo('#'+elementContainerId).hide();
+
 	for (var i = 0; i < elementsArray.length; i++) {
-		addElementButton(element, elementContainerId, parentElement, elementsArray[i], count, indent);
+		addElementButton(element, elementContainerId+'_elementsDiv', parentElement, elementsArray[i], count, indent);
 	}
 
 	// attribute div	
@@ -897,6 +908,226 @@ var genre_type_attr = {
 	}
 }
 
+var encoding_attr = {
+	title : 'type',
+	type : 'selection',
+	defaultValue : null,
+	values : ['','w3cdtf', 'iso8601','marc','edtf','temper'],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+var point_attr = {
+	title : 'point',
+	type : 'selection',
+	defaultValue : null,
+	values : ['','start','end'],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+var keyDate_attr = {
+	title : 'keyDate',
+	type : 'text',
+	defaultValue : 'yes',
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+var qualifier_attr = {
+	title : 'qualifier',
+	type : 'selection',
+	defaultValue : null,
+	values : ['','approximate','inferred','questionable'],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+var frequency_authority_attr = {
+	title : 'authority',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+/*
+var _attr = {
+	title : '',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+var _attr = {
+	title : '',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+var _attr = {
+	title : '',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+var _attr = {
+	title : '',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+var _attr = {
+	title : '',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+var _attr = {
+	title : '',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+*/
+/*
+var _attr = {
+	title : '',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+*/
 var Title = {
 	title : 'title',
 	repeatable : true,
@@ -1406,125 +1637,303 @@ var Publisher = {
 	}
 };
 
+
+var DateIssued = {
+	title : 'dateIssued',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ encoding_attr, point_attr, keyDate_attr, qualifier_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var DateCreated = {
+	title : 'dateCreated',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ encoding_attr, point_attr, keyDate_attr, qualifier_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var DateCaptured = {
+	title : 'dateCaptured',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ encoding_attr, point_attr, keyDate_attr, qualifier_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var DateValid = {
+	title : 'dateValid',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ encoding_attr, point_attr, keyDate_attr, qualifier_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var DateModified = {
+	title : 'dateModified',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ encoding_attr, point_attr, keyDate_attr, qualifier_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+
+var CopyrightDate = {
+	title : 'copyrightDate',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ encoding_attr, point_attr, keyDate_attr, qualifier_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+
+var DateOther = {
+	title : 'dateOther',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ encoding_attr, point_attr, keyDate_attr, qualifier_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+
+var Edition = {
+	title : 'edition',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ supplied_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+
+var Issuance = {
+	title : 'issuance',
+	repeatable : true,
+	type : 'selection',
+	singleton : false,
+	values: ['continuing', 'monographic', 'single unit', 'multipart monograph', 'serial', 'integrating resource'],
+        attributes : [ ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getValues" : function() {
+		return this.values;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+
+var Frequency = {
+	title : 'frequency',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ frequency_authority_attr, authorityURI_attr, valueURI_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
 /*
 var  = {
 	title : '',
 	repeatable : true,
 	type : 'text',
 	singleton : false,
-        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
-	elements : [ ],
- 
-	"getTitle" : function() {
-		return this.title;
-	},
-	"isRepeatable" : function() {
-		return this.repeatable;
-	},
-	"getType" : function() {
-		return this.type;
-	},
-	"isSingleton" : function() {
-		return this.singleton;
-	},
-	"getAttributes" : function() {
-		return this.attributes;
-	},
-	"getElements" : function() {
-		return this.elements;
-	}
-};
-
-var  = {
-	title : '',
-	repeatable : true,
-	type : 'text',
-	singleton : false,
-        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
-	elements : [ ],
- 
-	"getTitle" : function() {
-		return this.title;
-	},
-	"isRepeatable" : function() {
-		return this.repeatable;
-	},
-	"getType" : function() {
-		return this.type;
-	},
-	"isSingleton" : function() {
-		return this.singleton;
-	},
-	"getAttributes" : function() {
-		return this.attributes;
-	},
-	"getElements" : function() {
-		return this.elements;
-	}
-};
-
-var  = {
-	title : '',
-	repeatable : true,
-	type : 'text',
-	singleton : false,
-        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
-	elements : [ ],
- 
-	"getTitle" : function() {
-		return this.title;
-	},
-	"isRepeatable" : function() {
-		return this.repeatable;
-	},
-	"getType" : function() {
-		return this.type;
-	},
-	"isSingleton" : function() {
-		return this.singleton;
-	},
-	"getAttributes" : function() {
-		return this.attributes;
-	},
-	"getElements" : function() {
-		return this.elements;
-	}
-};
-
-var  = {
-	title : '',
-	repeatable : true,
-	type : 'text',
-	singleton : false,
-        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
-	elements : [ ],
- 
-	"getTitle" : function() {
-		return this.title;
-	},
-	"isRepeatable" : function() {
-		return this.repeatable;
-	},
-	"getType" : function() {
-		return this.type;
-	},
-	"isSingleton" : function() {
-		return this.singleton;
-	},
-	"getAttributes" : function() {
-		return this.attributes;
-	},
-	"getElements" : function() {
-		return this.elements;
-	}
-};
-
-var  = {
-	title : '',
-	repeatable : true,
-	type : 'text',
-	singleton : false,
-        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+        attributes : [ encoding_attr, point_attr, keyDate_attr, qualifier_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
 	elements : [ ],
  
 	"getTitle" : function() {
@@ -1553,7 +1962,7 @@ var  = {
 	repeatable : true,
 	type : 'text',
 	singleton : false,
-        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+        attributes : [ encoding_attr, point_attr, keyDate_attr, qualifier_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
 	elements : [ ],
  
 	"getTitle" : function() {
@@ -1576,186 +1985,12 @@ var  = {
 	}
 };
 
-
-var  = {
-	title : '',
-	repeatable : true,
-	type : 'text',
-	singleton : false,
-        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
-	elements : [ ],
- 
-	"getTitle" : function() {
-		return this.title;
-	},
-	"isRepeatable" : function() {
-		return this.repeatable;
-	},
-	"getType" : function() {
-		return this.type;
-	},
-	"isSingleton" : function() {
-		return this.singleton;
-	},
-	"getAttributes" : function() {
-		return this.attributes;
-	},
-	"getElements" : function() {
-		return this.elements;
-	}
-};
-
-
-var  = {
-	title : '',
-	repeatable : true,
-	type : 'text',
-	singleton : false,
-        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
-	elements : [ ],
- 
-	"getTitle" : function() {
-		return this.title;
-	},
-	"isRepeatable" : function() {
-		return this.repeatable;
-	},
-	"getType" : function() {
-		return this.type;
-	},
-	"isSingleton" : function() {
-		return this.singleton;
-	},
-	"getAttributes" : function() {
-		return this.attributes;
-	},
-	"getElements" : function() {
-		return this.elements;
-	}
-};
-
-
-var  = {
-	title : '',
-	repeatable : true,
-	type : 'text',
-	singleton : false,
-        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
-	elements : [ ],
- 
-	"getTitle" : function() {
-		return this.title;
-	},
-	"isRepeatable" : function() {
-		return this.repeatable;
-	},
-	"getType" : function() {
-		return this.type;
-	},
-	"isSingleton" : function() {
-		return this.singleton;
-	},
-	"getAttributes" : function() {
-		return this.attributes;
-	},
-	"getElements" : function() {
-		return this.elements;
-	}
-};
-
-
-var  = {
-	title : '',
-	repeatable : true,
-	type : 'text',
-	singleton : false,
-        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
-	elements : [ ],
- 
-	"getTitle" : function() {
-		return this.title;
-	},
-	"isRepeatable" : function() {
-		return this.repeatable;
-	},
-	"getType" : function() {
-		return this.type;
-	},
-	"isSingleton" : function() {
-		return this.singleton;
-	},
-	"getAttributes" : function() {
-		return this.attributes;
-	},
-	"getElements" : function() {
-		return this.elements;
-	}
-};
-
-
-var  = {
-	title : '',
-	repeatable : true,
-	type : 'text',
-	singleton : false,
-        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
-	elements : [ ],
- 
-	"getTitle" : function() {
-		return this.title;
-	},
-	"isRepeatable" : function() {
-		return this.repeatable;
-	},
-	"getType" : function() {
-		return this.type;
-	},
-	"isSingleton" : function() {
-		return this.singleton;
-	},
-	"getAttributes" : function() {
-		return this.attributes;
-	},
-	"getElements" : function() {
-		return this.elements;
-	}
-};
-
-
-var  = {
-	title : '',
-	repeatable : true,
-	type : 'text',
-	singleton : false,
-        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
-	elements : [ ],
- 
-	"getTitle" : function() {
-		return this.title;
-	},
-	"isRepeatable" : function() {
-		return this.repeatable;
-	},
-	"getType" : function() {
-		return this.type;
-	},
-	"isSingleton" : function() {
-		return this.singleton;
-	},
-	"getAttributes" : function() {
-		return this.attributes;
-	},
-	"getElements" : function() {
-		return this.elements;
-	}
-};
 */
-
 
 var OriginInfo = {
 	title : 'originInfo',
 	repeatable : true,
-	type : 'text',
+	type : 'none',
 	singleton : false,
         attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr, displayLabel_attr, altRepGroup_attr ],
 	elements : [ Place, Publisher, DateIssued, DateCreated, DateCaptured, DateValid, DateModified, CopyrightDate, DateOther, Edition, Issuance, Frequency ],
