@@ -34,7 +34,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -110,9 +109,7 @@ public class UserToGroupFilter extends OncePerRequestFilter {
 
 	public boolean hasAccess(HttpServletRequest request, List<String> groupList) {
 
-		try {
-			HttpSession session = request.getSession();
-			
+		try {			
 			String path = request.getRequestURI();
 			if (path != null) {
 				path = path.trim();
@@ -125,14 +122,8 @@ public class UserToGroupFilter extends OncePerRequestFilter {
 			if (user != null) {
 				user = user.trim();
 				logger.debug("remoteUser: " + user);
-				
-				session.setAttribute("remoteUser", user);
 			} else {
 				logger.debug("remoteUser is NULL");
-
-				user = (String) session.getAttribute("remoteUser");
-				
-				logger.debug("user is now: "+user);
 			}
 
 			logger.debug("requestURI: " + path);
@@ -142,10 +133,6 @@ public class UserToGroupFilter extends OncePerRequestFilter {
 			
 			if((members == null) || (members.trim().equals(""))) {
 				logger.debug("members is NULL");
-								
-				members = (String) session.getAttribute("isMemberOf");				
-			} else {
-				session.setAttribute("isMemberOf", members);
 			}
 
 			groupList.add(members);

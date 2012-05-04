@@ -42,34 +42,44 @@
     <div>
         <input type="button" id="titleInfoAdd" value="Add titleInfo" />
     </div>
-<br/><br/>
+<br/>
 <div id="name"/>
 </div>
 <br/>
     <div>
         <input type="button" id="nameAdd" value="Add name" />
     </div>
-<br/><br/>
+<br/>
 <div id="typeOfResource"></div>
 <br/>
     <div>
         <input type="button" id="typeOfResourceAdd" value="Add typeOfResource" />
     </div>
-<br/><br/>
+<br/>
 <div id="genre"></div>
 <br/>
     <div>
         <input type="button" id="genreAdd" value="Add genre" />
     </div>
-<br/><br/>
+<br/>
 <div id="originInfo"></div>
 <br/>
     <div>
         <input type="button" id="originInfoAdd" value="Add originInfo" />
     </div>
-<br/><br/>
+<br/>
 <div id="language"></div>
+<br/>
+    <div>
+        <input type="button" id="languageAdd" value="Add language" />
+    </div>
+<br/>
 <div id="physicalDescription"></div>
+<br/>
+    <div>
+        <input type="button" id="physicalDescriptionAdd" value="Add physicalDescription" />
+    </div>
+<br/>
 <div id="abstract"></div>
 <div id="tableOfContents"></div>
 <div id="targetAudience"></div>
@@ -110,8 +120,8 @@ $('#nameAdd').click(function() { addNameElements(); });
 $('#typeOfResourceAdd').click(function() { addTypeOfResourceElements(); });
 $('#genreAdd').click(function() { addGenreElements(); });
 $('#originInfoAdd').click(function() { addOriginInfoElements(); });
-$('#Add').click(function() { addElements(); });
-$('#Add').click(function() { addElements(); });
+$('#languageAdd').click(function() { addLanguageElements(); });
+$('#physicalDescriptionAdd').click(function() { addPhysicalDescriptionElements(); });
 $('#Add').click(function() { addElements(); });
 $('#Add').click(function() { addElements(); });
 $('#Add').click(function() { addElements(); });
@@ -379,7 +389,23 @@ function addOriginInfoElements() {
 	createElement(OriginInfo, $(window.MyVariables.xml).find("mods"), num, '#originInfo', 2);
 }
 
+function addLanguageElements() {
 
+	var num = $('#name > .languageInstance').length; 
+	
+	if(num == undefined) num = 0;
+	
+	createElement(Language, $(window.MyVariables.xml).find("mods"), num, '#language', 2);
+}
+
+function addPhysicalDescriptionElements() {
+
+	var num = $('#name > .physicalDescriptionInstance').length; 
+	
+	if(num == undefined) num = 0;
+	
+	createElement(PhysicalDescription, $(window.MyVariables.xml).find("mods"), num, '#physicalDescription', 2);
+}
 
 
 function setupEditor(xml)
@@ -397,6 +423,8 @@ function setupEditor(xml)
   $(window.MyVariables.xml).find('mods').children("typeOfResource").each(function() { addTypeOfResourceElements(); });
   $(window.MyVariables.xml).find('mods').children("genre").each(function() { addGenreElements(); });
   $(window.MyVariables.xml).find('mods').children("originInfo").each(function() { addOriginInfoElements(); });
+  $(window.MyVariables.xml).find('mods').children("language").each(function() { addLanguageElements(); });
+  $(window.MyVariables.xml).find('mods').children("physicalDescription").each(function() { addPhysicalDescriptionElements(); });
 }
 
 // Send XML back to be stored
@@ -796,6 +824,44 @@ var placeTerm_type_attr = {
 }
 
 var placeTerm_authority_attr = {
+	title : 'authority',
+	type : 'selection',
+	defaultValue : null,
+	values : ['','marcgac', 'marcountry', 'iso3166'],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var languageTerm_authority_attr = {
+	title : 'authority',
+	type : 'selection',
+	defaultValue : null,
+	values : ['', 'iso639-2b', 'rfc3066', 'iso639-3', 'rfc4646'],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var scriptTerm_authority_attr = {
 	title : 'type',
 	type : 'selection',
 	defaultValue : null,
@@ -813,6 +879,7 @@ var placeTerm_authority_attr = {
 		return this.values;
 	}
 }
+
 var titleInfo_type_attr = {
 	title : 'type',
 	type : 'selection',
@@ -889,6 +956,44 @@ var roleTerm_type_attr = {
 	}
 }
 
+var languageTerm_type_attr = {
+	title : 'type',
+	type : 'selection',
+	defaultValue : null,
+	values : ['','code', 'text'],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var scriptTerm_type_attr = {
+	title : 'type',
+	type : 'selection',
+	defaultValue : null,
+	values : ['','code', 'text'],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
 var genre_type_attr = {
 	title : 'type',
 	type : 'selection',
@@ -909,7 +1014,7 @@ var genre_type_attr = {
 }
 
 var encoding_attr = {
-	title : 'type',
+	title : 'encoding',
 	type : 'selection',
 	defaultValue : null,
 	values : ['','w3cdtf', 'iso8601','marc','edtf','temper'],
@@ -998,61 +1103,80 @@ var frequency_authority_attr = {
 		return this.values;
 	}
 }
+var objectPart_attr = {
+	title : 'objectPart',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+
+var form_authority_attr = {
+	title : 'authority',
+	type : 'text',
+	defaultValue : null,
+	values : [],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+var form_type_attr = {
+	title : 'type',
+	type : 'selection',
+	defaultValue : null,
+	values : ['', 'material', 'technique'],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
+var note_type_attr = {
+	title : 'type',
+	type : 'selection',
+	defaultValue : null,
+	values : ['', 'condition', 'marks', 'medium', 'organization', 'physical description', 'physical details', 'presentation', 'script', 'support', 'technique'],
+	"getTitle" : function() {
+		return this.title;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"getDefault" : function() {
+		return this.defaultValue;
+	},
+	"getValues" : function() {
+		return this.values;
+	}
+}
 /*
-var _attr = {
-	title : '',
-	type : 'text',
-	defaultValue : null,
-	values : [],
-	"getTitle" : function() {
-		return this.title;
-	},
-	"getType" : function() {
-		return this.type;
-	},
-	"getDefault" : function() {
-		return this.defaultValue;
-	},
-	"getValues" : function() {
-		return this.values;
-	}
-}
-var _attr = {
-	title : '',
-	type : 'text',
-	defaultValue : null,
-	values : [],
-	"getTitle" : function() {
-		return this.title;
-	},
-	"getType" : function() {
-		return this.type;
-	},
-	"getDefault" : function() {
-		return this.defaultValue;
-	},
-	"getValues" : function() {
-		return this.values;
-	}
-}
-var _attr = {
-	title : '',
-	type : 'text',
-	defaultValue : null,
-	values : [],
-	"getTitle" : function() {
-		return this.title;
-	},
-	"getType" : function() {
-		return this.type;
-	},
-	"getDefault" : function() {
-		return this.defaultValue;
-	},
-	"getValues" : function() {
-		return this.values;
-	}
-}
 var _attr = {
 	title : '',
 	type : 'text',
@@ -2014,6 +2138,297 @@ var OriginInfo = {
 		return this.elements;
 	}
 };
+
+
+var LanguageTerm = {
+	title : 'languageTerm',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ languageTerm_type_attr, languageTerm_authority_attr, authorityURI_attr, valueURI_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var ScriptTerm = {
+	title : 'scriptTerm',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ scriptTerm_type_attr, scriptTerm_authority_attr, authorityURI_attr, valueURI_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+
+var Language = {
+	title : 'language',
+	repeatable : true,
+	type : 'none',
+	singleton : false,
+        attributes : [ objectPart_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr, displayLabel_attr, usage_attr, altRepGroup_attr ],
+	elements : [ LanguageTerm, ScriptTerm ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var Form = {
+	title : 'form',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ form_authority_attr, authorityURI_attr, valueURI_attr, form_type_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var ReformattingQuality = {
+	title : 'reformattingQuality',
+	repeatable : true,
+	type : 'selection',
+	singleton : false,
+	values : [ '', 'access', 'preservation', 'replacement'],
+        attributes : [ ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getValues" : function() {
+		return this.values;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var InternetMediaType = {
+	title : 'internetMediaType',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var Extent = {
+	title : 'extent',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ supplied_attr, lang_attr, xmllang_attr, script_attr, transliteration_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var DigitalOrigin = {
+	title : 'digitalOrigin',
+	repeatable : true,
+	type : 'selection',
+	singleton : false,
+	values : ['', 'born digital', 'reformatted digital', 'digitized microfilm', 'digitized other analog'],
+        attributes : [ ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getValues" : function() {
+		return this.values;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var Physical_Description_Note = {
+	title : 'note',
+	repeatable : true,
+	type : 'text',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr, displayLabel_attr, note_type_attr, ID_attr ],
+	elements : [ ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
+var PhysicalDescription = {
+	title : 'physicalDescription',
+	repeatable : true,
+	type : 'none',
+	singleton : false,
+        attributes : [ lang_attr, xmllang_attr, script_attr, transliteration_attr, displayLabel_attr, altRepGroup_attr ],
+	elements : [ Form, ReformattingQuality, InternetMediaType, Extent, DigitalOrigin, Physical_Description_Note ],
+ 
+	"getTitle" : function() {
+		return this.title;
+	},
+	"isRepeatable" : function() {
+		return this.repeatable;
+	},
+	"getType" : function() {
+		return this.type;
+	},
+	"isSingleton" : function() {
+		return this.singleton;
+	},
+	"getAttributes" : function() {
+		return this.attributes;
+	},
+	"getElements" : function() {
+		return this.elements;
+	}
+};
+
 
 /*
 var  = {
